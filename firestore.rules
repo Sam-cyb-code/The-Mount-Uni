@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all paths by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper to validate announcement document structure
+    function isValidAnnouncement(data) {
+      return data.keys().hasAll(['priority', 'badge', 'text']) &&
+             data.keys().hasOnly(['priority', 'badge', 'text', 'actionLabel', 'actionHref', 'authorEmail', 'createdAt']) &&
+             data.priority in ['urgent', 'announcement', 'admissions'] &&
+             data.badge is string && data.badge.size() > 0 && data.badge.size() <= 60 &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 300 &&
+             (!('actionLabel' in data) || (data.actionLabel is string && data.actionLabel.size() <= 50)) &&
+             (!('actionHref' in data) || (data.actionHref is string && data.actionHref.size() <= 100)) &&
+             (!('authorEmail' in data) || (data.authorEmail is string && data.authorEmail.size() <= 120)) &&
+             (!('createdAt' in data) || (data.createdAt is string || data.createdAt is timestamp));
+    }
+
+    // Helper to validate student admissions application
+    function isValidApplication(data) {
+      return data.keys().hasAll(['studentName', 'parentName', 'parentEmail', 'parentPhone', 'gradeApplied']) &&
+             data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 100 &&
+             data.parentName is string && data.parentName.size() > 0 && data.parentName.size() <= 100 &&
+             data.parentEmail is string && data.parentEmail.size() > 0 && data.parentEmail.size() <= 100 &&
+             data.parentPhone is string && data.parentPhone.size() > 0 && data.parentPhone.size() <= 30 &&
+             data.gradeApplied is string && data.gradeApplied.size() > 0 && data.gradeApplied.size() <= 50 &&
+             (!('dob' in data) || (data.dob is string && data.dob.size() <= 30)) &&
+             (!('gender' in data) || (data.gender is string && data.gender.size() <= 20)) &&
+             (!('stream' in data) || (data.stream is string && data.stream.size() <= 50)) &&
+             (!('previousSchool' in data) || (data.previousSchool is string && data.previousSchool.size() <= 150)) &&
+             (!('transportZone' in data) || (data.transportZone is string && data.transportZone.size() <= 50)) &&
+             (!('status' in data) || (data.status in ['pending', 'under_review', 'accepted', 'scheduled'])) &&
+             (!('createdAt' in data) || (data.createdAt is string || data.createdAt is timestamp));
+    }
+
+    // Collection: Announcements & Emergency Ticker
+    match /announcements/{announcementId} {
+      allow get, list: if true;
+      allow create: if isValidId(announcementId) && isValidAnnouncement(incoming());
+      allow update: if isValidId(announcementId) && isValidAnnouncement(incoming());
+      allow delete: if isValidId(announcementId);
+    }
+
+    // Collection: Admissions Applications
+    match /applications/{applicationId} {
+      allow create: if isValidId(applicationId) && isValidApplication(incoming());
+      allow get, list: if true;
+      allow update: if isValidId(applicationId) && isValidApplication(incoming());
+      allow delete: if isValidId(applicationId);
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "The Mount Uni - Premier Institution",
+  "description": "Official layout shell, emergency alert ticker, sticky responsive mega-menu, and student portals for The Mount Uni.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

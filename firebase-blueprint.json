@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "announcement": {
+      "title": "announcement",
+      "description": "Institutional dispatches and emergency ticker announcements managed by administrators",
+      "type": "object",
+      "properties": {
+        "priority": {
+          "type": "string",
+          "enum": ["urgent", "announcement", "admissions"],
+          "description": "Notice priority level"
+        },
+        "badge": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Short label badge for ticker"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Announcement body message"
+        },
+        "actionLabel": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Optional CTA button text"
+        },
+        "actionHref": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Target section or link"
+        },
+        "authorEmail": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Email of the administrator who created the notice"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["priority", "badge", "text"]
+    },
+    "application": {
+      "title": "application",
+      "description": "Student admissions applications submitted through the multi-step form",
+      "type": "object",
+      "properties": {
+        "studentName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "dob": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "gender": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "gradeApplied": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "stream": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "parentName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "parentEmail": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "parentPhone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "previousSchool": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "transportZone": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "under_review", "accepted", "scheduled"]
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": ["studentName", "parentName", "parentEmail", "parentPhone", "gradeApplied"]
+    }
+  },
+  "firestore": {
+    "/announcements/{announcementId}": {
+      "schema": "announcement",
+      "description": "Live institutional emergency ticker and noticeboard announcements"
+    },
+    "/applications/{applicationId}": {
+      "schema": "application",
+      "description": "Prospective student admissions submissions"
+    }
+  }
+}

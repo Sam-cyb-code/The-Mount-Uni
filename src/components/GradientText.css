@@ -1,0 +1,67 @@
+.gradient-text {
+  position: relative;
+  display: inline-block;
+  background-image: var(--gt-gradient);
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.gradient-text__content {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  background-image: inherit;
+  background-size: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.gradient-text__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--gt-gradient);
+  background-size: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: blur(calc(var(--gt-glow, 1) * 8px));
+  opacity: calc(0.35 + var(--gt-glow, 1) * 0.45);
+  transform: translateZ(0);
+  user-select: none;
+}
+
+.gradient-text--border {
+  padding: 0.15em 0.5em;
+  border-radius: 9999px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gradient-text--border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--gt-border-width, 1.5px);
+  background: var(--gt-gradient);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-text {
+    background-image: var(--gt-gradient) !important;
+  }
+}

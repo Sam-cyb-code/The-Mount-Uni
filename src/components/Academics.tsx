@@ -3,9 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
   Cpu,
-  Palette,
-  Globe,
-  Sparkles,
   Layers,
   ChevronRight,
   Clock,
@@ -15,175 +12,192 @@ import {
   CheckCircle2,
   FileText,
   FlaskConical,
+  GraduationCap,
 } from 'lucide-react';
-import { GradientText } from './GradientText';
 
-export type CourseCategory = 'All' | 'STEM' | 'Arts' | 'Humanities';
+export type SubjectCategory = 'All' | 'Primary (1–5)' | 'Middle (6–8)' | 'Secondary (9–10)';
 
-export interface Course {
+export interface SchoolSubject {
   id: string;
   code: string;
   title: string;
-  category: CourseCategory;
-  track: 'Cambridge O/A Level' | 'BISE Matric/FSc' | 'Dual Core' | 'Honors';
-  department: string;
-  leadFaculty: string;
-  credits: number;
-  prerequisites: string;
+  category: 'Primary (1–5)' | 'Middle (6–8)' | 'Secondary (9–10)';
+  stream: string;
+  gradeLevel: string;
   description: string;
   topics: string[];
-  labHours: string;
+  schedule: string;
   featured?: boolean;
 }
 
-export const COURSES_CATALOG: Course[] = [
+export const SCHOOL_SUBJECTS: SchoolSubject[] = [
+  // Primary Stage
   {
-    id: 'stem-ai-robotics',
-    code: 'CS-401',
-    title: 'Autonomous Robotics & Applied Machine Learning',
-    category: 'STEM',
-    track: 'Honors',
-    department: 'Department of Computing & Advanced Systems',
-    leadFaculty: 'Dr. Tariq Mansoor, PhD (Imperial)',
-    credits: 4,
-    prerequisites: 'Differential Calculus & Python Fundamentals',
-    description: 'Hands-on embedded kinematics, neural network perception, ROS2 framework, and sensor fusion for robotic navigation.',
-    topics: ['Computer Vision with OpenCV', 'Kinematics & Microcontrollers', 'Deep Learning Perception', 'Autonomous Rover Trials'],
-    labHours: '6 hrs/week (Turing Systems Lab)',
+    id: 'primary-english',
+    code: 'ENG-PRI',
+    title: 'English Language & Reading Literacy',
+    category: 'Primary (1–5)',
+    stream: 'Core Primary Curriculum',
+    gradeLevel: 'Classes 1 to 5',
+    description: 'Developing phonics, vocabulary, guided reading comprehension, spelling rules, and expressive sentence construction.',
+    topics: ['Phonics & Pronunciation', 'Guided Story Reading', 'Basic Sentence Grammar', 'Creative Handwriting'],
+    schedule: '6 Periods / Week',
     featured: true,
   },
   {
-    id: 'stem-quantum-physics',
-    code: 'PHY-350',
-    title: 'Quantum Mechanics & Modern Laboratory Physics',
-    category: 'STEM',
-    track: 'Cambridge O/A Level',
-    department: 'Institute of Physical Sciences',
-    leadFaculty: 'Prof. Alistair Sterling, FRS',
-    credits: 4,
-    prerequisites: 'Advanced Level Physics & Pure Mathematics',
-    description: 'Comprehensive study of wave-particle duality, Schrödinger formulations, atomic spectroscopy, and precision laser interferometry.',
-    topics: ['Wave Packets & Operators', 'Zeeman Effect & Spectroscopy', 'Laser Optics Lab', 'Quantum Computing Foundations'],
-    labHours: '4 hrs/week (Faraday Lab)',
-  },
-  {
-    id: 'stem-molecular-bio',
-    code: 'BIO-320',
-    title: 'Cellular Biochemistry & Genetic Engineering',
-    category: 'STEM',
-    track: 'BISE Matric/FSc',
-    department: 'Faculty of Life Sciences & Pre-Medicine',
-    leadFaculty: 'Dr. Sophia Jahangir, FCPS',
-    credits: 4,
-    prerequisites: 'Biochemistry I & Organic Chemistry Lab',
-    description: 'CRISPR-Cas9 gene editing simulations, recombinant DNA techniques, enzyme kinetics, and clinical pathology preparation for MDCAT aspirants.',
-    topics: ['CRISPR & Gene Cloning', 'Protein Electrophoresis', 'Metabolic Pathways', 'Microbial Genetics'],
-    labHours: '5 hrs/week (Pasteur Bio-Suite)',
+    id: 'primary-math',
+    code: 'MTH-PRI',
+    title: 'Foundational Mathematics & Arithmetic',
+    category: 'Primary (1–5)',
+    stream: 'Core Primary Curriculum',
+    gradeLevel: 'Classes 1 to 5',
+    description: 'Building numerical confidence, place value, multiplication tables, mental arithmetic, fractions, and everyday word problems.',
+    topics: ['Four Operations (+, -, ×, ÷)', 'Fractions & Decimals Basics', 'Measurement & Time', 'Introductory Shapes & Geometry'],
+    schedule: '6 Periods / Week',
     featured: true,
   },
   {
-    id: 'stem-pure-math',
-    code: 'MTH-410',
-    title: 'Multivariable Calculus & Differential Manifolds',
-    category: 'STEM',
-    track: 'Dual Core',
-    department: 'Department of Pure & Applied Mathematics',
-    leadFaculty: 'Dr. Edward Vance, Cambridge',
-    credits: 3,
-    prerequisites: 'Single Variable Calculus & Linear Algebra',
-    description: 'Rigorous vector analysis, Green and Stokes theorems, tensor introductions, and mathematical physics simulations.',
-    topics: ['Differential Forms', 'Surface Integrals & Flux', 'Eigenvalue Theory', 'Boundary Value Problems'],
-    labHours: '2 hrs/week (Wolfram Math Lab)',
+    id: 'primary-science',
+    code: 'SCI-PRI',
+    title: 'General Science & Nature Discovery',
+    category: 'Primary (1–5)',
+    stream: 'Core Primary Curriculum',
+    gradeLevel: 'Classes 1 to 5',
+    description: 'Observation-based science introducing living things, plant lifecycles, states of matter, weather, and environmental care.',
+    topics: ['Plants & Animal Habitats', 'Solids, Liquids & Air', 'The Solar System & Seasons', 'Health, Hygiene & Nutrition'],
+    schedule: '4 Periods / Week',
   },
   {
-    id: 'arts-digital-arch',
-    code: 'ART-210',
-    title: 'Architectural Design & Parametric Spatial Forms',
-    category: 'Arts',
-    track: 'Honors',
-    department: 'School of Design & Spatial Arts',
-    leadFaculty: 'Ar. Marianne Delacroix, Harvard GSD',
-    credits: 3,
-    prerequisites: 'Freehand Drafting or Portfolio Review',
-    description: 'BIM modeling, computational generative structures, biomimicry in campus architecture, and physical laser-cut scale fabrication.',
-    topics: ['Parametric Modeling (Rhino/Grasshopper)', 'Structural Tectonics', 'Materiality & Light', 'Urban Ecology'],
-    labHours: '4 hrs/week (Zaha Hadid Studio)',
+    id: 'primary-urdu',
+    code: 'URD-PRI',
+    title: 'Urdu Language & Penmanship (اردو)',
+    category: 'Primary (1–5)',
+    stream: 'National Languages',
+    gradeLevel: 'Classes 1 to 5',
+    description: 'Mastery in Urdu alphabet letters (حروف تہجی), word formation, reading fluency, and polite conversational etiquette.',
+    topics: ['حروف شناسی اور ملاوٹ', 'جملہ سازی اور املا', 'مختصر کہانیاں اور نظمیں', 'خوشخطی مشق'],
+    schedule: '5 Periods / Week',
+  },
+
+  // Middle Stage
+  {
+    id: 'middle-general-science',
+    code: 'SCI-MID',
+    title: 'Integrated Science & Laboratory Concepts',
+    category: 'Middle (6–8)',
+    stream: 'Middle School Sciences',
+    gradeLevel: 'Classes 6 to 8',
+    description: 'Bridging general science into core fundamentals of Physics (motion, forces, energy), Chemistry (elements, compounds), and Biology (human systems).',
+    topics: ['Cell Structure & Human Anatomy', 'Atoms, Molecules & Chemical Changes', 'Forces, Energy & Electric Circuits', 'Ecosystems & Water Cycle'],
+    schedule: '5 Periods / Week (Includes Science Demos)',
     featured: true,
   },
   {
-    id: 'arts-symphonic',
-    code: 'MUS-180',
-    title: 'Symphonic Composition & Orchestral Conduct',
-    category: 'Arts',
-    track: 'Cambridge O/A Level',
-    department: 'Conservatory of Music & Sonic Arts',
-    leadFaculty: 'Maestro Julian Ross, Royal Academy',
-    credits: 3,
-    prerequisites: 'Grade 5 Theory or Instrumental Audition',
-    description: 'Classical counterpoint, orchestration for 60-piece brass and string ensembles, contemporary film scoring, and choir direction.',
-    topics: ['Four-Part Harmony', 'Orchestral Scoring', 'Logic Pro Audio Engineering', 'Live Conductor Rehearsals'],
-    labHours: '3 hrs/week (Elgar Concert Hall)',
+    id: 'middle-math',
+    code: 'MTH-MID',
+    title: 'Intermediate Mathematics & Algebra',
+    category: 'Middle (6–8)',
+    stream: 'Middle School Curriculum',
+    gradeLevel: 'Classes 6 to 8',
+    description: 'Transitioning from arithmetic to algebraic equations, ratios, percentages, commercial arithmetic, and geometrical proofs.',
+    topics: ['Linear Equations & Algebraic Expressions', 'Ratio, Proportion & Percentage', 'Practical Geometry & Angles', 'Perimeter, Area & Volume'],
+    schedule: '6 Periods / Week',
   },
   {
-    id: 'arts-visual-media',
-    code: 'ART-305',
-    title: 'Documentary Cinematography & Visual Narrative',
-    category: 'Arts',
-    track: 'Dual Core',
-    department: 'Media Studies & Screen Arts',
-    leadFaculty: 'Kiran Raza, BAFTA Fellow',
-    credits: 3,
-    prerequisites: 'Visual Storytelling or Photography portfolio',
-    description: 'Anamorphic lens optics, cinematic lighting design, non-linear editing in DaVinci Resolve, and investigative documentary fieldwork.',
-    topics: ['Color Grading & ACES Color', 'Microphone Boom & Spatial Audio', 'Archival Research', 'Film Festival Submission'],
-    labHours: '4 hrs/week (Mount Media Pavilion)',
+    id: 'middle-computer',
+    code: 'CS-MID',
+    title: 'Computer Studies & Digital Skills',
+    category: 'Middle (6–8)',
+    stream: 'Information Technology',
+    gradeLevel: 'Classes 6 to 8',
+    description: 'Computer hardware architecture, operating system navigation, typing speed, productivity software (Docs, Sheets), and basic logic.',
+    topics: ['Hardware Components & Storage', 'Typing Skills & Word Processing', 'Internet Safety & Research Ethics', 'Algorithms & Flowcharts'],
+    schedule: '3 Periods / Week (Computer Lab)',
   },
   {
-    id: 'hum-diplomatic-law',
-    code: 'LAW-315',
-    title: 'Public International Law & Global Treaties',
-    category: 'Humanities',
-    track: 'Cambridge O/A Level',
-    department: 'Department of Jurisprudence & Legal Studies',
-    leadFaculty: 'Barrister Sarah H. Siddiqui, Lincoln’s Inn',
-    credits: 4,
-    prerequisites: 'Constitutional History or Introduction to Law',
-    description: 'Maritime boundary disputes, Geneva conventions, international arbitration tribunals, and Moot Court simulation at The Hague standards.',
-    topics: ['State Sovereignty & Jurisdiction', 'Human Rights Treaties', 'International Court of Justice Moots', 'Extradition Norms'],
-    labHours: '2 hrs/week (Blackstone Moot Court)',
+    id: 'middle-social',
+    code: 'SOC-MID',
+    title: 'History, Geography & Social Studies',
+    category: 'Middle (6–8)',
+    stream: 'Social Sciences',
+    gradeLevel: 'Classes 6 to 8',
+    description: 'Study of historical civilizations, regional geography, natural resources, landforms, and civic responsibilities.',
+    topics: ['Early Civilizations & Heritage', 'Physical Landscapes & Climate Zones', 'Natural Resources & Agriculture', 'Civics & Community Rights'],
+    schedule: '4 Periods / Week',
+  },
+
+  // Secondary Stage (Classes 9–10)
+  {
+    id: 'sec-physics',
+    code: 'PHY-SEC',
+    title: 'Secondary Physics (Theory & Practicals)',
+    category: 'Secondary (9–10)',
+    stream: 'Science Group (Matriculation)',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'Comprehensive preparation for secondary board examinations covering mechanics, thermal physics, sound, light optics, and electricity.',
+    topics: ['Kinematics & Newton’s Laws', 'Work, Energy & Power', 'Reflection & Refraction of Light', 'Current Electricity & Magnetism'],
+    schedule: '5 Periods / Week + Lab Practicals',
     featured: true,
   },
   {
-    id: 'hum-world-lit',
-    code: 'LIT-420',
-    title: 'Comparative Post-Colonial Rhetoric & World Literature',
-    category: 'Humanities',
-    track: 'Honors',
-    department: 'Faculty of Classical & World Literatures',
-    leadFaculty: 'Dr. Raymond Thorne, Oxford',
-    credits: 3,
-    prerequisites: 'English Literature Grade B+ or higher',
-    description: 'Textual analysis of South Asian, Francophone African, and Caribbean narratives, translation theory, and seminar defense papers.',
-    topics: ['Subaltern Studies', 'Modernist Poetics', 'Dialectical Discourse', 'Archival Manuscripts'],
-    labHours: 'Seminar Series (Bodleian Reading Room)',
+    id: 'sec-chemistry',
+    code: 'CHM-SEC',
+    title: 'Secondary Chemistry (Theory & Practicals)',
+    category: 'Secondary (9–10)',
+    stream: 'Science Group (Matriculation)',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'Fundamental chemical principles, atomic structure, periodic table classification, chemical bonding, acids/bases, and laboratory tests.',
+    topics: ['Atomic Models & Electronic Configuration', 'Chemical Bonds & Formulas', 'Acids, Bases & Salts', 'Electrochemistry & Solutions'],
+    schedule: '5 Periods / Week + Lab Practicals',
   },
   {
-    id: 'hum-political-econ',
-    code: 'ECO-340',
-    title: 'Macroeconomic Policy & Behavioral Game Theory',
-    category: 'Humanities',
-    track: 'BISE Matric/FSc',
-    department: 'School of Economics & Public Policy',
-    leadFaculty: 'Dr. Hamza Khurshid, LSE',
-    credits: 4,
-    prerequisites: 'Principles of Economics & Statistics',
-    description: 'Nash equilibrium dynamics, sovereign debt restructuring, central banking monetary mechanisms, and econometric forecasting in Stata.',
-    topics: ['Bayesian Game Formulations', 'Central Bank Open Market Ops', 'Poverty Alleviation Econometrics', 'Fiscal Policy Debates'],
-    labHours: '3 hrs/week (Keynes Analytics Suite)',
+    id: 'sec-biology',
+    code: 'BIO-SEC',
+    title: 'Secondary Biology',
+    category: 'Secondary (9–10)',
+    stream: 'Science Group (Bio Option)',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'Cell biology, human physiology, respiration, transport mechanisms, genetics introduction, and dissection/microscopy practicals.',
+    topics: ['Cellular Organization & Tissues', 'Enzymes & Bioenergetics', 'Human Circulation & Respiratory System', 'Reproduction & Inheritance Basics'],
+    schedule: '5 Periods / Week + Lab Practicals',
+  },
+  {
+    id: 'sec-computer',
+    code: 'CS-SEC',
+    title: 'Secondary Computer Science',
+    category: 'Secondary (9–10)',
+    stream: 'Science Group (CS Option)',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'Computer fundamentals, binary data representation, logic gates, operating systems, and beginner programming logic.',
+    topics: ['Data Representation & Number Systems', 'Boolean Logic & Truth Tables', 'Computer Software & Network Basics', 'Introductory Programming Constructs'],
+    schedule: '5 Periods / Week + Practical Lab',
+  },
+  {
+    id: 'sec-math',
+    code: 'MTH-SEC',
+    title: 'Secondary Mathematics (Science & General)',
+    category: 'Secondary (9–10)',
+    stream: 'Core Secondary Requirement',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'Matrices, logarithms, algebraic manipulation, quadratic equations, trigonometry, and circle geometry theorems for board examinations.',
+    topics: ['Matrices & Determinants', 'Logarithms & Scientific Notation', 'Algebraic Formulas & Factorization', 'Geometry Theorems & Trigonometry'],
+    schedule: '6 Periods / Week',
+    featured: true,
+  },
+  {
+    id: 'sec-humanities',
+    code: 'HUM-SEC',
+    title: 'Humanities & General Subjects',
+    category: 'Secondary (9–10)',
+    stream: 'Humanities Group',
+    gradeLevel: 'Classes 9 & 10',
+    description: 'General Science, General Mathematics, Civics, Education, English, Urdu, Islamiat, and Pakistan Studies.',
+    topics: ['Everyday Science & Technology', 'Practical Arithmetic & Business Math', 'Constitution & Civic Duties', 'Pakistan Studies & History'],
+    schedule: 'Full Weekly Curriculum',
   },
 ];
 
-interface AcademicsProps {
+export interface AcademicsProps {
   onOpenCurriculumMatrix?: () => void;
   onOpenApplication?: () => void;
 }
@@ -192,338 +206,208 @@ export const Academics: React.FC<AcademicsProps> = ({
   onOpenCurriculumMatrix,
   onOpenApplication,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<CourseCategory>('All');
+  const [selectedCategory, setSelectedCategory] = useState<SubjectCategory>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [activeSubject, setActiveSubject] = useState<SchoolSubject | null>(null);
 
-  const categories: CourseCategory[] = ['All', 'STEM', 'Arts', 'Humanities'];
-
-  const filteredCourses = COURSES_CATALOG.filter((course) => {
+  const filteredSubjects = SCHOOL_SUBJECTS.filter((subject) => {
     const matchesCategory =
-      activeCategory === 'All' || course.category === activeCategory;
+      selectedCategory === 'All' || subject.category === selectedCategory;
     const matchesSearch =
       searchQuery === '' ||
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      subject.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subject.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subject.gradeLevel.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   return (
-    <section id="academics-showcase" className="py-24 bg-[#070E1C] text-stone-100 border-b border-blue-950 relative overflow-hidden">
-      {/* Subtle Background Glows */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-amber-600/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div id="academics-catalog" className="w-full bg-[#FBF9F5] py-16 text-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 pb-6 border-b border-blue-950/80 gap-6">
-          <div className="max-w-2xl">
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400 block mb-2">
-              Curriculum Catalog & Departmental Modules
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-stone-100">
-              Academics of{' '}
-              <GradientText
-                colors={['#F59E0B', '#FDE047', '#60A5FA', '#3B82F6']}
-                variant="flow"
-                animationSpeed={6}
-                glow={0.3}
-                className="font-serif italic"
-              >
-                Uncompromising Rigor
-              </GradientText>
-            </h2>
-            <p className="mt-3 text-sm sm:text-base text-stone-300 font-light leading-relaxed">
-              Explore our interdisciplinary catalog bridging Cambridge International examinations, national BISE syllabi, and pre-university research labs. Filter by scholarly division below.
-            </p>
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-900 text-xs font-bold uppercase tracking-wider mb-3">
+            <GraduationCap className="w-4 h-4 text-blue-700" />
+            <span>Academic Curriculum · Classes 1 to 10</span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {onOpenCurriculumMatrix && (
-              <button
-                type="button"
-                onClick={onOpenCurriculumMatrix}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-amber-300 bg-[#0B1528] border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition-all shadow-md"
-              >
-                <Layers className="w-4 h-4 text-amber-400" />
-                Dual-Track Matrix (Matric / O-Level)
-              </button>
-            )}
-            {onOpenApplication && (
-              <button
-                type="button"
-                onClick={onOpenApplication}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-all shadow-md shadow-amber-500/20"
-              >
-                Apply for 2027
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+            Comprehensive Subject Offerings
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            From early literacy and numbers in Class 1 to secondary board examination preparation in Class 10, our curriculum ensures thorough understanding and steady academic progress.
+          </p>
         </div>
 
-        {/* Task 1: Filter Chips & Search Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-10">
-          {/* Filter Chips with Animated Background */}
-          <div
-            role="tablist"
-            aria-label="Course Category Filters"
-            className="flex items-center p-1.5 rounded-2xl bg-[#0B1528] border border-blue-950 overflow-x-auto max-w-full"
-          >
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat;
-              return (
+        {/* Filter Controls (Segmented Buttons) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
+            {(['All', 'Primary (1–5)', 'Middle (6–8)', 'Secondary (9–10)'] as SubjectCategory[]).map(
+              (cat) => (
                 <button
                   key={cat}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`relative px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 z-10 ${
-                    isActive ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-100'
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    selectedCategory === cat
+                      ? 'bg-white text-blue-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  {/* Framer Motion layoutId highlight pill */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeFilterChip"
-                      className="absolute inset-0 bg-amber-400 rounded-xl -z-10 shadow-lg"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  {cat === 'All' && 'All Divisions'}
-                  {cat === 'STEM' && 'STEM & Labs'}
-                  {cat === 'Arts' && 'Fine & Spatial Arts'}
-                  {cat === 'Humanities' && 'Humanities & Law'}
+                  {cat}
                 </button>
-              );
-            })}
+              )
+            )}
           </div>
 
-          {/* Quick Search */}
+          {/* Search Bar */}
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search code, module, faculty..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0B1528] border border-blue-950 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+              placeholder="Search subjects or grade..."
+              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-2xs"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white text-xs"
-              >
-                Clear
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Task 1: Filterable Course Catalog with Framer Motion layout and layoutId */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <AnimatePresence>
-            {filteredCourses.map((course) => (
-              <motion.div
-                key={course.id}
-                layout
-                layoutId={course.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.25 }}
-                className="group relative flex flex-col justify-between p-6 rounded-2xl bg-[#0B1528]/80 border border-blue-950 hover:border-amber-500/40 hover:bg-[#0D1930] transition-all duration-300 shadow-xl"
-              >
-                <div>
-                  {/* Top Meta Header */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-xs font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
-                      {course.code}
-                    </span>
-                    <span className="text-[11px] font-medium text-stone-400 px-2 py-0.5 rounded bg-blue-950/60 border border-blue-900/40">
-                      {course.track}
-                    </span>
-                  </div>
-
-                  {/* Title & Department */}
-                  <h3 className="font-serif text-lg font-bold text-stone-100 group-hover:text-amber-200 transition-colors mb-2 leading-snug">
-                    {course.title}
-                  </h3>
-                  <p className="text-xs text-stone-400 font-mono mb-4">
-                    {course.department}
-                  </p>
-
-                  {/* Body Overview */}
-                  <p className="text-xs text-stone-300 font-light leading-relaxed mb-5">
-                    {course.description}
-                  </p>
-
-                  {/* Key Topics Badges */}
-                  <div className="mb-5">
-                    <span className="text-[10px] uppercase font-mono tracking-wider text-stone-400 block mb-2">
-                      Syllabus Competencies
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {course.topics.map((topic) => (
-                        <span
-                          key={topic}
-                          className="text-[11px] px-2 py-1 rounded-md bg-[#070E1C] border border-blue-950 text-stone-300"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Meta & Interaction */}
-                <div className="pt-4 border-t border-blue-950/80 flex items-center justify-between text-xs text-stone-400">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-amber-400/80" />
-                    <span>{course.labHours}</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCourse(course)}
-                    className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold group-hover:translate-x-0.5 transition-all"
-                  >
-                    Details
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {filteredCourses.length === 0 && (
-          <div className="p-12 text-center rounded-2xl bg-[#0B1528] border border-blue-950">
-            <BookOpen className="w-8 h-8 text-stone-500 mx-auto mb-3" />
-            <h4 className="text-base font-serif font-bold text-stone-200 mb-1">
-              No matching modules found
-            </h4>
-            <p className="text-xs text-stone-400 mb-4">
-              Try adjusting your search terms or select "All Divisions".
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveCategory('All');
-                setSearchQuery('');
-              }}
-              className="px-4 py-2 text-xs font-semibold text-stone-950 bg-amber-400 rounded-lg hover:bg-amber-300"
+        {/* Grid of School Subjects */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSubjects.map((subject) => (
+            <div
+              key={subject.id}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between text-left group"
             >
-              Reset Filters
-            </button>
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                    {subject.code}
+                  </span>
+                  <span className="text-xs text-blue-900 font-bold">
+                    {subject.gradeLevel}
+                  </span>
+                </div>
+
+                <h3 className="font-serif text-lg font-bold text-slate-900 group-hover:text-blue-900 transition-colors mb-2">
+                  {subject.title}
+                </h3>
+
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                  {subject.stream}
+                </span>
+
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  {subject.description}
+                </p>
+
+                {/* Topics List */}
+                <div className="pt-3 border-t border-slate-100">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-2">
+                    Key Topics Covered:
+                  </span>
+                  <ul className="space-y-1 text-xs text-slate-600">
+                    {subject.topics.map((t, idx) => (
+                      <li key={idx} className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                        <span className="truncate">{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {subject.schedule}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveSubject(subject)}
+                  className="font-bold text-blue-900 hover:text-blue-700 underline underline-offset-2 cursor-pointer"
+                >
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredSubjects.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+            <p className="text-sm text-slate-500">
+              No subjects found matching "{searchQuery}".
+            </p>
           </div>
         )}
-      </div>
 
-      {/* Course Detail Modal */}
-      {selectedCourse && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-          onClick={() => setSelectedCourse(null)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#0B1528] border border-blue-850 rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl text-stone-100 max-h-[90vh] overflow-y-auto"
+        {/* Detailed Subject Modal */}
+        {activeSubject && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+            onClick={() => setActiveSubject(null)}
           >
-            <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-blue-950">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
-                  {selectedCourse.code}
+            <div
+              className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl text-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                <div>
+                  <span className="text-xs font-bold text-blue-900 font-mono">
+                    {activeSubject.code} · {activeSubject.gradeLevel}
+                  </span>
+                  <h4 className="font-serif text-xl font-bold text-slate-900 mt-1">
+                    {activeSubject.title}
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSubject(null)}
+                  className="text-slate-400 hover:text-slate-700 text-lg font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                {activeSubject.description}
+              </p>
+
+              <div className="mb-4">
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-2">
+                  Complete Topic Outline:
                 </span>
-                <span className="text-xs font-semibold text-stone-300">
-                  {selectedCourse.department}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedCourse(null)}
-                className="text-stone-400 hover:text-white p-1 rounded-lg"
-              >
-                ✕
-              </button>
-            </div>
-
-            <h3 className="font-serif text-2xl font-bold text-stone-100 mb-2">
-              {selectedCourse.title}
-            </h3>
-            <p className="text-xs text-amber-300 font-mono mb-4">
-              Lead Academic: {selectedCourse.leadFaculty}
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#070E1C] border border-blue-950 mb-6 text-xs">
-              <div>
-                <span className="text-[10px] font-mono text-stone-500 uppercase block">Curriculum Stream</span>
-                <span className="font-semibold text-stone-200">{selectedCourse.track}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-mono text-stone-500 uppercase block">Modular Credits</span>
-                <span className="font-semibold text-stone-200">{selectedCourse.credits} Credit Hours</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-mono text-stone-500 uppercase block">Laboratory Schedule</span>
-                <span className="font-semibold text-stone-200">{selectedCourse.labHours}</span>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-xs text-stone-300 leading-relaxed mb-6 font-light">
-              <div>
-                <h4 className="font-semibold text-stone-100 mb-1">Prerequisites & Entry Standards:</h4>
-                <p className="text-stone-400">{selectedCourse.prerequisites}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-stone-100 mb-1">Module Overview:</h4>
-                <p>{selectedCourse.description}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-stone-100 mb-2">Core Topics & Benchmark Deliverables:</h4>
-                <ul className="space-y-1.5 list-disc list-inside text-stone-300">
-                  {selectedCourse.topics.map((t) => (
-                    <li key={t}>{t}</li>
+                <ul className="space-y-1.5 text-xs text-slate-700">
+                  {activeSubject.topics.map((t, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                      <span>{t}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-blue-950">
-              <button
-                type="button"
-                onClick={() => setSelectedCourse(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-300 hover:text-white bg-[#070E1C] border border-blue-950 rounded-lg"
-              >
-                Close
-              </button>
-              {onOpenCurriculumMatrix && (
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 mb-6">
+                <span className="font-semibold text-slate-800 block">Class Schedule:</span>
+                <span>{activeSubject.schedule} with regular assessment tests and term exams.</span>
+              </div>
+
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCourse(null);
-                    onOpenCurriculumMatrix();
-                  }}
-                  className="px-4 py-2 text-xs font-semibold text-stone-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors"
+                  onClick={() => setActiveSubject(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
                 >
-                  View Dual-Track Matrix
+                  Close
                 </button>
-              )}
+              </div>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </section>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

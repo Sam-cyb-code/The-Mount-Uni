@@ -1,20 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowRight,
   Compass,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
   Users,
   GraduationCap,
   Award,
   Sparkles,
   BookOpen,
   ShieldCheck,
-  Trophy,
-  Cpu,
   CheckCircle2,
   MapPin,
   Calendar,
@@ -22,779 +16,743 @@ import {
   ChevronRight,
   Clock,
   Building,
-  Zap,
+  Maximize2,
+  X,
+  ExternalLink,
+  Phone,
+  FileText,
 } from 'lucide-react';
-import { PATHWAY_DATA, PathwayRole } from '../utils/homeUtils';
-import { VirtualTourModal } from './VirtualTourModal';
-import { LaserFlow } from './LaserFlow';
-import { GradientText } from './GradientText';
-import { GlassIcons, GlassIconItem } from './GlassIcons';
+import { PATHWAY_DATA, PathwayRole, getPathwayContent } from '../utils/homeUtils';
+import { MONOGRAPH_VIGNETTES, MonographVignette } from '../data/monographData';
 
 interface HomeProps {
   onOpenApplyModal?: () => void;
   onOpenMatrixModal?: () => void;
   onOpenPortalModal?: (portalId?: string) => void;
+  onOpenMonograph?: () => void;
   onShowToast?: (msg: string) => void;
 }
-
-interface StoryCard {
-  id: string;
-  step: string;
-  title: string;
-  pillar: string;
-  subtitle: string;
-  description: string;
-  metrics: { value: string; label: string };
-  highlights: string[];
-  gradient: string;
-  accentColor: string;
-  icon: 'BookOpen' | 'ShieldCheck' | 'Trophy' | 'Cpu';
-}
-
-const STORY_CARDS: StoryCard[] = [
-  {
-    id: 'academics',
-    step: '01 / ACADEMICS',
-    pillar: 'Scholarly Rigor & Dual Streams',
-    title: 'Cambridge & National Matric Dual Architecture',
-    subtitle: 'Where traditional classical inquiry meets modern laboratory experimentation.',
-    description:
-      'Candidates choose between Cambridge International (IGCSE, O-Levels, A-Levels) and the National Board (BISE Matriculation & FSc Pre-Med / Pre-Eng), supported by 1:8 faculty mentorship and 12 dedicated STEM research laboratories.',
-    metrics: { value: '94.8%', label: 'Top-tier university placements worldwide' },
-    highlights: [
-      'Dual CAIE & BISE accredited faculties',
-      'Ivy League & Russell Group college counseling cell',
-      'Advanced physics, molecular biology & robotics hubs',
-    ],
-    gradient: 'from-blue-950/80 via-[#0B1528] to-[#070E1C]',
-    accentColor: 'text-blue-400',
-    icon: 'BookOpen',
-  },
-  {
-    id: 'character',
-    step: '02 / CHARACTER',
-    pillar: 'Moral Pedigree & Ethical Leadership',
-    title: 'Honor Code, Debate & Civic Stewardship',
-    subtitle: 'Intellect without moral grounding is hollow. We cultivate courageous ethical leaders.',
-    description:
-      'Rooted in our four historic residential houses, scholars participate in student-governed honor courts, world-championship parliamentary debating, and 120 annual hours of public civic stewardship across community outreach clinics.',
-    metrics: { value: '100%', label: 'Student community stewardship engagement' },
-    highlights: [
-      'Four residential houses fostering collegiate brotherhood & sisterhood',
-      'National Champion Parliamentary Debating Union',
-      'Chancellor Fellowship for public interest projects',
-    ],
-    gradient: 'from-amber-950/70 via-[#0B1528] to-[#070E1C]',
-    accentColor: 'text-amber-400',
-    icon: 'ShieldCheck',
-  },
-  {
-    id: 'sports',
-    step: '03 / SPORTS',
-    pillar: 'Champions of Field & Turf',
-    title: 'Olympic-Standard Athletics & Team Ethos',
-    subtitle: 'Physical endurance forged on manicured ovals, heated pools, and squash courts.',
-    description:
-      'Our 40-acre athletic estate features an Olympic-standard 8-lane heated competition pool, international glass-back squash arenas, FIFA-grade turf, and historic cricket pavilions coached by former national olympians.',
-    metrics: { value: '32', label: 'Inter-Collegiate championship trophies won' },
-    highlights: [
-      'Heated 50-meter Olympic aquatic pavilion',
-      'Turf athletics track & floodlit football arenas',
-      'Sports physiology, nutrition & recovery clinic',
-    ],
-    gradient: 'from-emerald-950/70 via-[#0B1528] to-[#070E1C]',
-    accentColor: 'text-emerald-400',
-    icon: 'Trophy',
-  },
-  {
-    id: 'innovation',
-    step: '04 / INNOVATION',
-    pillar: 'The Frontier of Discovery',
-    title: 'Autonomous AI, Robotics & Venture Seed Hub',
-    subtitle: 'Transforming theoretical wonder into patents, hardware, and sustainable systems.',
-    description:
-      'From building autonomous rovers and satellite ground stations to testing microbial fuel cells, Mount Uni scholars collaborate directly with industry researchers and access a dedicated student seed venture fund.',
-    metrics: { value: '18+', label: 'Student filed technological patents & ventures' },
-    highlights: [
-      'Class-100 Cleanroom & AI Supercomputing cluster',
-      'Astrophysics rooftop observatory & telescope dome',
-      'Annual $100K Chancellor Student Venture Seed Grant',
-    ],
-    gradient: 'from-indigo-950/70 via-[#0B1528] to-[#070E1C]',
-    accentColor: 'text-indigo-400',
-    icon: 'Cpu',
-  },
-];
 
 export const Home: React.FC<HomeProps> = ({
   onOpenApplyModal,
   onOpenMatrixModal,
   onOpenPortalModal,
+  onOpenMonograph,
   onShowToast,
 }) => {
   const [selectedRole, setSelectedRole] = useState<PathwayRole>('parent');
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
-  const [isTourModalOpen, setIsTourModalOpen] = useState(false);
-  const [isLaserEnabled, setIsLaserEnabled] = useState(true);
-  const [laserColor, setLaserColor] = useState<string>('#2563EB');
-  const [glassPlate, setGlassPlate] = useState<'tilt' | 'offset' | 'circle' | 'none'>('tilt');
-  const [glassHover, setGlassHover] = useState<'lift' | 'float' | 'press'>('lift');
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const heroSurfaceRef = useRef<HTMLDivElement | null>(null);
+  const [activePhoto, setActivePhoto] = useState<MonographVignette | null>(null);
 
-  const portalGlassItems: GlassIconItem[] = [
-    {
-      id: 'parent',
-      label: 'Parent Gateway',
-      icon: <Users className="w-8 h-8 text-amber-300" />,
-      color: 'orange',
-      onClick: () => {
-        if (onOpenPortalModal) onOpenPortalModal('parent');
-        else if (onShowToast) onShowToast('Parent Portal Gateway accessed');
-      },
-    },
-    {
-      id: 'student',
-      label: 'Student SIS & LMS',
-      icon: <GraduationCap className="w-8 h-8 text-blue-300" />,
-      color: 'blue',
-      onClick: () => {
-        if (onOpenPortalModal) onOpenPortalModal('student');
-        else if (onShowToast) onShowToast('Student SIS & LMS accessed');
-      },
-    },
-    {
-      id: 'faculty',
-      label: 'Faculty & Regent',
-      icon: <BookOpen className="w-8 h-8 text-purple-300" />,
-      color: 'purple',
-      onClick: () => {
-        if (onOpenPortalModal) onOpenPortalModal('staff');
-        else if (onShowToast) onShowToast('Faculty & Regent Terminal accessed');
-      },
-    },
-    {
-      id: 'admissions',
-      label: 'Admissions 2027',
-      icon: <Award className="w-8 h-8 text-emerald-300" />,
-      color: 'teal',
-      onClick: () => {
-        if (onOpenApplyModal) onOpenApplyModal();
-        else {
-          const el = document.querySelector('#admissions-apply');
-          el?.scrollIntoView({ behavior: 'smooth' });
-        }
-      },
-    },
-    {
-      id: 'alumni',
-      label: 'Alumni Network',
-      icon: <Compass className="w-8 h-8 text-indigo-300" />,
-      color: 'indigo',
-      onClick: () => {
-        setSelectedRole('alumni');
-        const el = document.querySelector('#pathways');
-        el?.scrollIntoView({ behavior: 'smooth' });
-      },
-    },
-  ];
+  const currentPathway = getPathwayContent(selectedRole);
 
-  // Horizontal Storytelling Scroll binding
-  const horizontalSectionRef = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({
-    target: horizontalSectionRef,
-    offset: ['start start', 'end end'],
-  });
-
-  // Translate container horizontally across screen (from 0% to -72%)
-  const xTransform = useTransform(scrollYProgress, [0, 1], ['0%', '-68%']);
-  const progressPercent = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-
-  const toggleVideoPlayback = () => {
-    if (videoRef.current) {
-      if (isVideoPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(() => {});
-      }
-      setIsVideoPlaying(!isVideoPlaying);
-    }
-  };
-
-  const currentPathway = PATHWAY_DATA[selectedRole];
+  const officialYandexMapUrl = 'https://yandex.com/maps/-/CXVyNN8q';
 
   return (
-    <div className="w-full bg-[#070E1C] text-stone-100 selection:bg-blue-600/40">
+    <div className="w-full bg-[#FBF9F5] text-slate-800 selection:bg-blue-100 selection:text-blue-900">
       {/* ========================================================================= */}
-      {/* TASK 1: CINEMATIC HERO SECTION                                            */}
-      {/* ========================================================================= */}
-      <section
-        className="relative min-h-[92vh] lg:min-h-screen w-full flex items-center justify-center overflow-hidden border-b border-blue-950 bg-black"
-        aria-label="Cinematic Campus Hero"
-      >
-        {/* Looping Background Video with Resilient Fallback Overlay */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'><rect width='1920' height='1080' fill='%23070E1C'/></svg>"
-            className="w-full h-full object-cover scale-105 filter brightness-[0.40] contrast-[1.15]"
-          >
-            {/* HTML5 sample loop with open educational video */}
-            <source
-              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-              type="video/mp4"
-            />
-          </video>
-
-          {/* Deep Cinematic Contrast Scrims */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070E1C] via-[#070E1C]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#070E1C]/90 via-transparent to-[#070E1C]/90" />
-          
-          {/* Subtle animated optical atmospheric grid */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e3a8a_1px,transparent_1px)] [background-size:32px_32px] opacity-20" />
-        </div>
-
-        {/* WebGL2 LaserFlow Quantum Light Animation Layer */}
-        {isLaserEnabled && (
-          <div className="absolute inset-0 w-full h-full z-[5] pointer-events-auto">
-            <LaserFlow
-              surfaceRef={heroSurfaceRef}
-              color={laserColor}
-              beamPosition={0.5}
-              surfaceLevel={0.34}
-              intensity={1.8}
-              beamWidth={1.5}
-              flare={1.6}
-              spread={1.5}
-              spill={1.2}
-              fog={0.25}
-              dust={1.6}
-              streaks={1.5}
-              dots={1.0}
-              pulse={1.4}
-              speed={1.3}
-              mouseInteraction={true}
-              theme="dark"
-              className="w-full h-full"
-            />
-          </div>
-        )}
-
-        {/* LaserFlow Controls (Bottom-Left) */}
-        <div className="absolute bottom-6 left-6 z-20 hidden md:flex items-center gap-2.5 bg-[#070E1C]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-blue-900/40 text-stone-300 text-xs shadow-xl">
-          <button
-            type="button"
-            onClick={() => {
-              setIsLaserEnabled(!isLaserEnabled);
-              if (onShowToast) onShowToast(isLaserEnabled ? 'Laser Flow Shader disabled' : 'Laser Flow Shader activated');
-            }}
-            className="flex items-center gap-1.5 hover:text-white transition-colors"
-            title={isLaserEnabled ? 'Disable Laser Flow Animation' : 'Enable Laser Flow Animation'}
-          >
-            <Zap className={`w-3.5 h-3.5 ${isLaserEnabled ? 'text-amber-400' : 'text-stone-500'}`} />
-            <span className="text-[11px] font-mono">
-              {isLaserEnabled ? 'Laser Flow: Active' : 'Laser Flow: Off'}
-            </span>
-          </button>
-
-          {isLaserEnabled && (
-            <>
-              <span className="text-stone-600">│</span>
-              <div className="flex items-center gap-1.5">
-                {[
-                  { color: '#2563EB', label: 'Sapphire Lapis' },
-                  { color: '#D97706', label: 'Crest Amber' },
-                  { color: '#059669', label: 'Verdant Emerald' },
-                  { color: '#7C3AED', label: 'Imperial Violet' },
-                ].map((c) => (
-                  <button
-                    key={c.color}
-                    type="button"
-                    onClick={() => {
-                      setLaserColor(c.color);
-                      if (onShowToast) onShowToast(`Laser Tint set to ${c.label}`);
-                    }}
-                    aria-label={c.label}
-                    title={c.label}
-                    className={`w-3 h-3 rounded-full transition-transform ${
-                      laserColor === c.color
-                        ? 'scale-125 ring-2 ring-white ring-offset-1 ring-offset-[#070E1C]'
-                        : 'opacity-70 hover:opacity-100'
-                    }`}
-                    style={{ backgroundColor: c.color }}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Video Playback & Accessibility Controls (Bottom-Right) */}
-        <div className="absolute bottom-6 right-6 z-20 hidden sm:flex items-center gap-2 bg-[#070E1C]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-900/40 text-stone-300 text-xs">
-          <button
-            type="button"
-            onClick={toggleVideoPlayback}
-            aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'}
-            className="flex items-center gap-1.5 hover:text-white transition-colors"
-          >
-            {isVideoPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span className="text-[11px] font-mono">{isVideoPlaying ? 'Pause Ambience' : 'Play Ambience'}</span>
-          </button>
-        </div>
-
-        {/* Hero Mission Statement Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
-          {/* Institution Motto Kicker (Tracked by LaserFlow surfaceRef) */}
-          <motion.div
-            ref={heroSurfaceRef}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/70 border border-blue-500/30 text-blue-300 text-xs font-mono uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>Veritas · Disciplina · Lux · Est. 1984</span>
-          </motion.div>
-
-          {/* Bold Mission Statement Headline with Dynamic Gradient Ripple */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-100 leading-[1.14] text-balance max-w-4xl"
-          >
-            Educating Minds of Rigor.{' '}
-            <GradientText
-              colors={['#F59E0B', '#FDE047', '#60A5FA', '#3B82F6']}
-              variant="flow"
-              animationSpeed={6}
-              glow={0.5}
-              followPointer={true}
-              className="font-serif italic drop-shadow-sm inline-block"
-            >
-              Cultivating Characters of Honor.
-            </GradientText>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 text-sm sm:text-base lg:text-lg text-stone-300 max-w-2xl font-light leading-relaxed"
-          >
-            A premier independent seat of discovery where scholars thrive across dual Cambridge O/A Levels and National Matric/FSc streams, empowered for transformative global leadership.
-          </motion.p>
-
-          {/* Primary Action Buttons with Framer Motion Hover Scale Effects */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
-          >
-            {/* CTA 1: Apply for 2027 */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-              onClick={() => {
-                if (onOpenApplyModal) onOpenApplyModal();
-                else if (onShowToast) onShowToast('Admissions Application for 2027 initiated.');
-                const target = document.querySelector('#admissions-apply');
-                target?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-7 py-4 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-950 bg-amber-400 hover:bg-amber-300 transition-all shadow-xl shadow-amber-500/25 flex items-center gap-2.5 cursor-pointer"
-            >
-              <span>Apply for 2027</span>
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
-
-            {/* CTA 2: Virtual Tour */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-              onClick={() => setIsTourModalOpen(true)}
-              className="px-7 py-4 rounded-xl text-xs sm:text-sm font-semibold tracking-wide text-blue-200 hover:text-white bg-blue-950/80 hover:bg-blue-900/80 border border-blue-500/40 backdrop-blur-md transition-all shadow-xl shadow-blue-950/50 flex items-center gap-2.5 cursor-pointer"
-            >
-              <Compass className="w-4 h-4 text-blue-400" />
-              <span>Virtual Tour</span>
-            </motion.button>
-          </motion.div>
-
-          {/* Micro Trust Indicators Strip */}
-          <div className="mt-14 pt-8 border-t border-blue-950/70 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs text-stone-400">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
-              Cambridge Assessment International Partner
-            </span>
-            <span className="hidden sm:inline text-blue-900">·</span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-              BISE & HEC Registered Charter
-            </span>
-            <span className="hidden sm:inline text-blue-900">·</span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              $2.4M Annual Merit & Need Scholarships
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* EXECUTIVE INSTITUTIONAL GATEWAYS (POWERED BY GLASS ICONS)                 */}
+      {/* 1. WELCOMING HERO SECTION WITH GENUINE SCHOOL PHOTOGRAPHY                 */}
       {/* ========================================================================= */}
       <section
-        className="relative py-20 px-4 sm:px-6 lg:px-8 border-b border-blue-950 bg-gradient-to-b from-[#070E1C] via-[#091428] to-[#070E1C] overflow-hidden"
-        aria-label="Institutional Gateways"
-      >
-        {/* Ambient atmospheric backdrop glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
-
-        <div className="relative max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-500/30 text-amber-400 text-xs font-mono uppercase tracking-widest mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Encrypted Single Sign-On Infrastructure</span>
-          </div>
-
-          <h2 className="font-serif text-2xl sm:text-4xl font-bold text-stone-100 tracking-tight mb-3">
-            Institutional Portals &{' '}
-            <GradientText
-              colors={['#60A5FA', '#93C5FD', '#F59E0B', '#FCD34D']}
-              variant="conic"
-              animationSpeed={7}
-              glow={0.3}
-              className="font-serif italic"
-            >
-              Academic Terminals
-            </GradientText>
-          </h2>
-
-          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-stone-300 font-light leading-relaxed mb-10">
-            Interactive, liquid-refraction glass gateways granting instant access to student records, guardian accounts, regent administration, and the 2027 admissions cycle.
-          </p>
-
-          {/* Interactive Physics Controls for GlassIcons */}
-          <div className="mb-10 flex flex-wrap items-center justify-center gap-3 text-xs">
-            <div className="inline-flex items-center gap-1.5 bg-[#070E1C]/80 border border-blue-900/60 rounded-xl px-3 py-1.5 backdrop-blur-md">
-              <span className="text-stone-400 font-mono text-[11px]">Plate Physics:</span>
-              {(['tilt', 'offset', 'circle', 'none'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setGlassPlate(mode)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono capitalize transition-colors cursor-pointer ${
-                    glassPlate === mode
-                      ? 'bg-amber-400 text-stone-950 font-bold shadow-md'
-                      : 'text-stone-400 hover:text-stone-200'
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 bg-[#070E1C]/80 border border-blue-900/60 rounded-xl px-3 py-1.5 backdrop-blur-md">
-              <span className="text-stone-400 font-mono text-[11px]">Surface Response:</span>
-              {(['lift', 'float', 'press'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setGlassHover(mode)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono capitalize transition-colors cursor-pointer ${
-                    glassHover === mode
-                      ? 'bg-blue-500 text-white font-bold shadow-md'
-                      : 'text-stone-400 hover:text-stone-200'
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* GlassIcons Interactive Component Grid */}
-          <div className="py-4">
-            <GlassIcons
-              items={portalGlassItems}
-              size={84}
-              gap={48}
-              columns={5}
-              roundness={0.65}
-              refraction={0.85}
-              bevel={0.6}
-              dispersion={0.4}
-              frost={0.25}
-              shine={0.9}
-              tint="#070E1C"
-              tintOpacity={0.25}
-              plate={glassPlate}
-              hover={glassHover}
-              tilt={28}
-              spread={0.55}
-              parallax={0.9}
-              labels="always"
-              theme="dark"
-              intro={true}
-              className="my-2"
-            />
-          </div>
-
-          <p className="mt-8 text-[11px] font-mono text-stone-400">
-            Hover, tilt, and press over glass plates to engage real-time liquid dispersion and 3D normal refraction.
-          </p>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* TASK 2: PERSONALIZED PATHWAY SECTION                                      */}
-      {/* ========================================================================= */}
-      <section
-        id="pathways"
-        className="py-24 border-b border-blue-950 bg-[#070E1C] relative"
-        aria-label="Personalized Pathways"
+        className="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200 py-12 sm:py-16 lg:py-20 overflow-hidden"
+        aria-label="Welcome to The Mount School"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Kicker & Heading */}
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400 block mb-2">
-              Personalized Orientation
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            {/* Left Column: School Introduction & Purpose */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              {/* Institution Identity Kicker */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-900 text-xs font-semibold tracking-wide shadow-2xs">
+                <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>The Mount School · Dedicated to Classes 1 through 10</span>
+              </div>
+
+              {/* Main Headline */}
+              <h1 className="font-serif text-3xl sm:text-5xl lg:text-[3.25rem] font-bold tracking-tight text-slate-900 leading-[1.18]">
+                Nurturing Character, Discipline, and{' '}
+                <span className="text-blue-900 underline decoration-amber-400 decoration-3 underline-offset-6">
+                  Academic Excellence
+                </span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl">
+                A welcoming, structured educational environment designed exclusively for students from{' '}
+                <strong className="text-slate-900 font-semibold">Class 1 through Class 10</strong>. We combine fundamental literacy, core sciences, and moral values with caring, experienced teachers.
+              </p>
+
+              {/* Clean Academic Stage Markers (Zero-Pill Discipline) */}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-700 font-medium pt-1">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0" />
+                  Primary School (Classes 1–5)
+                </span>
+                <span className="text-slate-300" aria-hidden="true">·</span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0" />
+                  Middle School (Classes 6–8)
+                </span>
+                <span className="text-slate-300" aria-hidden="true">·</span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0" />
+                  Secondary School (Classes 9–10)
+                </span>
+              </div>
+
+              {/* Call-to-Action Buttons */}
+              <div className="pt-4 flex flex-wrap items-center gap-3.5 sm:gap-4">
+                {/* Primary CTA: Admissions 1-10 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = document.querySelector('#admissions');
+                    target?.scrollIntoView({ behavior: 'smooth' });
+                    if (onShowToast) onShowToast('Navigated to Admissions (Classes 1–10).');
+                  }}
+                  className="px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+                >
+                  <span>Admissions Open (Classes 1–10)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                {/* Secondary CTA: Location & Directions */}
+                <a
+                  href="#location"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const target = document.querySelector('#location');
+                    target?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-5 py-3.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:text-blue-950 bg-white hover:bg-slate-50 border border-slate-300 shadow-2xs hover:shadow-xs transition-all flex items-center gap-2"
+                >
+                  <MapPin className="w-4 h-4 text-blue-700" />
+                  <span>Find Our School</span>
+                </a>
+
+                {/* Tertiary CTA: School Gallery */}
+                <a
+                  href="#school-gallery"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const target = document.querySelector('#school-gallery');
+                    target?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-4 py-3.5 rounded-xl text-xs sm:text-sm font-semibold text-blue-900 hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+                >
+                  <span>View Facilities Gallery</span>
+                  <ChevronRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column: Hero Real School Photograph Frame */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xl group">
+                <img
+                  src="/school-images/campus-corridor-colonnade.jpg"
+                  alt="School Campus Corridor with Classic Brick Colonnade"
+                  className="w-full h-[360px] sm:h-[420px] object-cover transition-transform duration-500 group-hover:scale-102"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
+
+                {/* Photo Caption Tag */}
+                <div className="absolute bottom-4 left-4 right-4 text-white text-left">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-sans font-bold uppercase tracking-wider bg-blue-900 text-white inline-block mb-1">
+                    Campus Infrastructure
+                  </span>
+                  <h3 className="font-serif text-base sm:text-lg font-bold text-white leading-snug">
+                    Central Academic Corridor & Brick Colonnade
+                  </h3>
+                  <p className="text-xs text-slate-200 font-light mt-0.5 line-clamp-2">
+                    Naturally ventilated hallways with classic red brick columns and tactile guidance pathways.
+                  </p>
+                </div>
+              </div>
+
+              {/* Quiet Micro Feature Badge */}
+              <div className="absolute -bottom-4 -left-3 hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-md text-xs font-semibold text-slate-800">
+                <Building className="w-4 h-4 text-amber-600" />
+                <span>Safe, Disciplined Learning Campus</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 2. SCHOOL CORE PILLARS & EDUCATIONAL VALUES (CLASSES 1–10)                */}
+      {/* ========================================================================= */}
+      <section className="py-16 sm:py-20 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-900 block mb-2">
+              Our Educational Mission
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">
-              Where do you want to start?
+            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              A Solid Foundation from Primary to Secondary
             </h2>
-            <p className="mt-3 text-sm text-stone-300 font-light leading-relaxed">
-              Every member of our community walks a distinctive journey. Select your role to tailor admission guides, student tools, or alumni fellowship resources.
+            <p className="mt-3 text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+              We focus on cultivating strong foundational skills in literacy, numeracy, and scientific thinking while instilling respect, integrity, and good character in every student.
             </p>
           </div>
 
-          {/* Three Interactive Pathway Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {/* Card 1: Prospective Parent */}
-            <div
-              onClick={() => setSelectedRole('parent')}
-              className={`cursor-pointer rounded-2xl border p-7 transition-all duration-300 relative flex flex-col justify-between group ${
-                selectedRole === 'parent'
-                  ? 'bg-blue-950/50 border-amber-400/80 shadow-2xl ring-1 ring-amber-400/30'
-                  : 'bg-[#0B1528] border-blue-950 hover:border-blue-800 hover:bg-[#0E1A33]'
-              }`}
-            >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Pillar 1 */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-[#FBF9F5] hover:border-blue-300 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-900">
-                    Cohort 2027
-                  </span>
+                <div className="w-12 h-12 rounded-xl bg-blue-100/80 text-blue-900 flex items-center justify-center mb-4">
+                  <BookOpen className="w-6 h-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-stone-100 mb-1 group-hover:text-amber-300 transition-colors">
-                  Prospective Parent
+                <h3 className="font-serif text-lg font-bold text-slate-900 mb-2">
+                  Classes 1 to 10 Curriculum
                 </h3>
-                <span className="text-xs text-amber-400/90 font-medium block mb-3">
-                  Early Years through Senior Dual Streams
-                </span>
-                <p className="text-xs text-stone-400 leading-relaxed mb-6 font-light">
-                  Explore academic rigor, campus safety, tuition transparency, and how our dual Cambridge & Matric tracks prepare your child for world-class universities.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  A structured syllabus providing comprehensive coverage in English, Urdu, Mathematics, General Science, and Social Studies, leading to Secondary Board readiness.
                 </p>
               </div>
-
-              <div className="pt-4 border-t border-blue-950 flex items-center justify-between text-xs font-semibold">
-                <span className={selectedRole === 'parent' ? 'text-amber-300' : 'text-stone-400'}>
-                  {selectedRole === 'parent' ? 'Active Pathway' : 'Select Pathway'}
-                </span>
-                <ArrowRight
-                  className={`w-4 h-4 transition-transform ${
-                    selectedRole === 'parent'
-                      ? 'translate-x-1 text-amber-400'
-                      : 'text-stone-500 group-hover:translate-x-1 group-hover:text-amber-400'
-                  }`}
-                />
+              <div className="pt-4 mt-4 border-t border-slate-200 text-xs font-semibold text-blue-900 flex items-center gap-1">
+                <span>Classes 1–10 Only</span>
               </div>
             </div>
 
-            {/* Card 2: Current Student */}
-            <div
-              onClick={() => setSelectedRole('student')}
-              className={`cursor-pointer rounded-2xl border p-7 transition-all duration-300 relative flex flex-col justify-between group ${
-                selectedRole === 'student'
-                  ? 'bg-blue-950/50 border-blue-400/80 shadow-2xl ring-1 ring-blue-400/30'
-                  : 'bg-[#0B1528] border-blue-950 hover:border-blue-800 hover:bg-[#0E1A33]'
-              }`}
-            >
+            {/* Pillar 2 */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-[#FBF9F5] hover:border-blue-300 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-                    <GraduationCap className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-900">
-                    LMS & Guilds
-                  </span>
+                <div className="w-12 h-12 rounded-xl bg-amber-100/80 text-amber-800 flex items-center justify-center mb-4">
+                  <GraduationCap className="w-6 h-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-stone-100 mb-1 group-hover:text-blue-300 transition-colors">
-                  Current Student
+                <h3 className="font-serif text-lg font-bold text-slate-900 mb-2">
+                  B2 Reading Room & Library
                 </h3>
-                <span className="text-xs text-blue-400/90 font-medium block mb-3">
-                  Academic Command & Campus Life
-                </span>
-                <p className="text-xs text-stone-400 leading-relaxed mb-6 font-light">
-                  Quick access to course syllabi, library archives, robotics hackathons, athletic schedules, and university counseling appointments.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Home to our dedicated library and quiet reading wing, inspired by the guiding philosophy: <em className="text-slate-800">“A library is a hospital for the mind.”</em>
                 </p>
               </div>
-
-              <div className="pt-4 border-t border-blue-950 flex items-center justify-between text-xs font-semibold">
-                <span className={selectedRole === 'student' ? 'text-blue-300' : 'text-stone-400'}>
-                  {selectedRole === 'student' ? 'Active Pathway' : 'Select Pathway'}
-                </span>
-                <ArrowRight
-                  className={`w-4 h-4 transition-transform ${
-                    selectedRole === 'student'
-                      ? 'translate-x-1 text-blue-400'
-                      : 'text-stone-500 group-hover:translate-x-1 group-hover:text-blue-400'
-                  }`}
-                />
+              <div className="pt-4 mt-4 border-t border-slate-200 text-xs font-semibold text-amber-800 flex items-center gap-1">
+                <span>Active Reading Culture</span>
               </div>
             </div>
 
-            {/* Card 3: Alumni */}
-            <div
-              onClick={() => setSelectedRole('alumni')}
-              className={`cursor-pointer rounded-2xl border p-7 transition-all duration-300 relative flex flex-col justify-between group ${
-                selectedRole === 'alumni'
-                  ? 'bg-blue-950/50 border-emerald-400/80 shadow-2xl ring-1 ring-emerald-400/30'
-                  : 'bg-[#0B1528] border-blue-950 hover:border-blue-800 hover:bg-[#0E1A33]'
-              }`}
-            >
+            {/* Pillar 3 */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-[#FBF9F5] hover:border-blue-300 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-                    <Award className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-900">
-                    Fellowship
-                  </span>
+                <div className="w-12 h-12 rounded-xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center mb-4">
+                  <Building className="w-6 h-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-stone-100 mb-1 group-hover:text-emerald-300 transition-colors">
-                  Alumni & Fellow
+                <h3 className="font-serif text-lg font-bold text-slate-900 mb-2">
+                  Spacious, Sunlit Classrooms
                 </h3>
-                <span className="text-xs text-emerald-400/90 font-medium block mb-3">
-                  Lifelong Global Network
-                </span>
-                <p className="text-xs text-stone-400 leading-relaxed mb-6 font-light">
-                  Stay connected with fellow graduates across 38 countries, mentor current scholars, attend reunions, and support university endowments.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Wide, naturally illuminated classrooms featuring multi-pane windows looking onto outdoor trees, durable dual-seater desks, and fresh cross ventilation.
                 </p>
               </div>
+              <div className="pt-4 mt-4 border-t border-slate-200 text-xs font-semibold text-emerald-800 flex items-center gap-1">
+                <span>Inspiring Study Spaces</span>
+              </div>
+            </div>
 
-              <div className="pt-4 border-t border-blue-950 flex items-center justify-between text-xs font-semibold">
-                <span className={selectedRole === 'alumni' ? 'text-emerald-300' : 'text-stone-400'}>
-                  {selectedRole === 'alumni' ? 'Active Pathway' : 'Select Pathway'}
-                </span>
-                <ArrowRight
-                  className={`w-4 h-4 transition-transform ${
-                    selectedRole === 'alumni'
-                      ? 'translate-x-1 text-emerald-400'
-                      : 'text-stone-500 group-hover:translate-x-1 group-hover:text-emerald-400'
-                  }`}
-                />
+            {/* Pillar 4 */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-[#FBF9F5] hover:border-blue-300 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-purple-100/80 text-purple-900 flex items-center justify-center mb-4">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h3 className="font-serif text-lg font-bold text-slate-900 mb-2">
+                  Discipline & Moral Character
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Dedicated teachers who take personal interest in each student's progress, maintaining respectful classroom etiquette and regular parent feedback.
+                </p>
+              </div>
+              <div className="pt-4 mt-4 border-t border-slate-200 text-xs font-semibold text-purple-900 flex items-center gap-1">
+                <span>Dedicated Faculty</span>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Dynamic Pathway Showcase Tray */}
-          <div className="p-8 rounded-2xl border border-blue-900/60 bg-[#0B1528] shadow-2xl">
+      {/* ========================================================================= */}
+      {/* 3. AUTHENTIC SCHOOL PHOTO GALLERY (THE 5 REFERENCE PHOTOGRAPHS)          */}
+      {/* ========================================================================= */}
+      <section
+        id="school-gallery"
+        className="py-16 sm:py-20 bg-[#F8FAFC] border-b border-slate-200"
+        aria-label="Genuine School Photographs"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-4 border-b border-slate-200 gap-4">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-900 block mb-1.5">
+                Authentic Campus Documentation
+              </span>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
+                School Facilities & Reference Photographs
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                Actual photographs of our campus corridors, classrooms, B2 library reading room, and academic notice board.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-600">5 Documented Facilities</span>
+            </div>
+          </div>
+
+          {/* Grid of the 5 Actual Photographs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {MONOGRAPH_VIGNETTES.map((item, idx) => (
+              <div
+                key={item.rawIndex}
+                className={`rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col justify-between ${
+                  idx === 0 ? 'md:col-span-2 lg:col-span-2' : ''
+                }`}
+              >
+                {/* Photo Media */}
+                <div
+                  className="relative overflow-hidden bg-slate-100 cursor-pointer h-64 sm:h-72"
+                  onClick={() => setActivePhoto(item)}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/10 transition-colors" />
+
+                  {/* Top Badge */}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-2.5 py-1 rounded text-[11px] font-sans font-bold bg-white/95 text-blue-950 shadow-xs border border-slate-200">
+                      {item.serial} · {item.year}
+                    </span>
+                  </div>
+
+                  {/* Expand Icon */}
+                  <div className="absolute bottom-3 right-3 p-2 rounded-lg bg-white/90 text-slate-800 shadow-sm opacity-90 group-hover:opacity-100">
+                    <Maximize2 className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Caption Details */}
+                <div className="p-5 text-left flex flex-col justify-between flex-1">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 block mb-1">
+                      {item.classification}
+                    </span>
+                    <h3 className="font-serif text-base sm:text-lg font-bold text-slate-900 group-hover:text-blue-900 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1.5 text-xs text-slate-600 font-normal leading-relaxed line-clamp-3">
+                      {item.summary}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {item.specifications[0]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActivePhoto(item)}
+                      className="text-xs font-bold text-blue-900 hover:text-blue-700 underline underline-offset-2 cursor-pointer"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 4. DEDICATED OFFICIAL LOCATION SECTION (YANDEX MAPS INTEGRATION)         */}
+      {/* ========================================================================= */}
+      <section
+        id="location"
+        className="py-16 sm:py-20 bg-white border-b border-slate-200"
+        aria-label="Official School Location on Yandex Maps"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50/60 via-white to-amber-50/40 p-6 sm:p-10 shadow-md">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-7 space-y-4">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-blue-600/20 text-blue-300 border border-blue-500/30">
-                    {currentPathway.badge}
-                  </span>
-                  <span className="text-xs text-stone-400 font-serif italic">
-                    {currentPathway.tagline}
+              {/* Left Column: Location Info & Official Yandex Maps CTA */}
+              <div className="lg:col-span-7 space-y-5 text-left">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 text-blue-900 text-xs font-bold tracking-wide">
+                  <MapPin className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span>Official School Location · Yandex Maps</span>
+                </div>
+
+                <h2 className="font-serif text-2xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+                  Find Our School & Plan Your Visit
+                </h2>
+
+                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+                  Our school campus is conveniently located and easily accessible. Parents, students, and visitors are welcome to visit during official administrative hours for admissions, inquiries, or scheduled campus meetings.
+                </p>
+
+                {/* Location Coordinates & Key Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                    <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block mb-1">
+                      Map Coordinates
+                    </span>
+                    <span className="text-sm font-mono font-semibold text-slate-800">
+                      32.834662° N, 72.999090° E
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                    <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block mb-1">
+                      Admissions Office Hours
+                    </span>
+                    <span className="text-xs font-medium text-slate-700">
+                      Monday – Saturday: 8:00 AM – 2:00 PM
+                    </span>
+                  </div>
+                </div>
+
+                {/* Direct Get Directions Link Button */}
+                <div className="pt-3 flex flex-wrap items-center gap-4">
+                  <a
+                    href={officialYandexMapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <MapPin className="w-4 h-4 text-amber-300" />
+                    <span>Get Directions on Yandex Maps</span>
+                    <ExternalLink className="w-4 h-4 text-white/80" />
+                  </a>
+
+                  <span className="text-xs text-slate-500">
+                    Official link: <span className="font-mono text-slate-700">{officialYandexMapUrl}</span>
                   </span>
                 </div>
-                <h4 className="font-serif text-2xl font-bold text-stone-100">
+              </div>
+
+              {/* Right Column: Visual Map Representation Card */}
+              <div className="lg:col-span-5">
+                <div className="rounded-2xl border border-slate-300 bg-white p-5 shadow-lg relative overflow-hidden">
+                  {/* Stylized Interactive Map Card */}
+                  <div className="relative h-64 sm:h-72 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex flex-col items-center justify-center p-6 text-center">
+                    {/* Map Grid Pattern */}
+                    <div className="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:20px_20px] opacity-40" />
+
+                    {/* Central Pin */}
+                    <div className="relative z-10 w-16 h-16 rounded-full bg-blue-900 text-white flex items-center justify-center shadow-xl border-4 border-white animate-bounce">
+                      <MapPin className="w-8 h-8 text-amber-400" />
+                    </div>
+
+                    <div className="relative z-10 mt-4 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm max-w-xs">
+                      <h4 className="font-serif font-bold text-slate-900 text-sm">
+                        The Mount School
+                      </h4>
+                      <p className="text-[11px] text-slate-600 mt-0.5">
+                        Classes 1–10 Main Campus
+                      </p>
+                      <a
+                        href={officialYandexMapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:text-blue-700 underline mt-1"
+                      >
+                        <span>Open Yandex Maps</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                    <span>Direct GPS Routing</span>
+                    <a
+                      href={officialYandexMapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-blue-900 hover:underline"
+                    >
+                      Open Navigation →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. ACADEMIC LEVELS (CLASSES 1 TO 10 BREAKDOWN)                             */}
+      {/* ========================================================================= */}
+      <section
+        id="academics-showcase"
+        className="py-16 sm:py-20 bg-[#FBF9F5] border-b border-slate-200"
+        aria-label="Academic Classes Breakdown"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-900 block mb-1.5">
+              Academic Progression
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
+              Classes 1 through 10 Structure
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Carefully organized educational stages designed to build confidence, deep understanding, and examination readiness.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Primary School (1-5) */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-900 inline-block mb-3">
+                  Stage 1 · Foundation
+                </span>
+                <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">
+                  Primary School
+                </h3>
+                <span className="text-xs text-blue-800 font-semibold block mb-3">
+                  Classes 1 to 5 (Ages 5–10)
+                </span>
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  Focusing on strong foundations in language reading, handwriting, basic arithmetic, curiosity-driven science, and moral values.
+                </p>
+                <ul className="space-y-1.5 text-xs text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                    <span>English & Urdu Language Literacy</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                    <span>Arithmetic & Numerical Fluency</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                    <span>General Science & Environmental Studies</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                    <span>Art, Drawing & Creative Projects</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <span className="text-xs font-semibold text-blue-900">Dedicated Classroom Environment</span>
+              </div>
+            </div>
+
+            {/* Middle School (6-8) */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 inline-block mb-3">
+                  Stage 2 · Preparatory
+                </span>
+                <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">
+                  Middle School
+                </h3>
+                <span className="text-xs text-amber-800 font-semibold block mb-3">
+                  Classes 6 to 8 (Ages 11–13)
+                </span>
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  Developing intermediate problem solving, introductory experimental science concepts, computer studies, and history/geography.
+                </p>
+                <ul className="space-y-1.5 text-xs text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>General Science (Physics, Chemistry, Biology)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Algebra, Geometry & Practical Math</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Computer Studies & Typing Fundamentals</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Social Studies, History & Geography</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <span className="text-xs font-semibold text-amber-900">Analytical & Study Habits</span>
+              </div>
+            </div>
+
+            {/* Secondary School (9-10) */}
+            <div className="p-6 rounded-2xl border border-blue-200 bg-blue-50/40 hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-blue-900 text-white inline-block mb-3">
+                  Stage 3 · Board Examination
+                </span>
+                <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">
+                  Secondary School
+                </h3>
+                <span className="text-xs text-blue-900 font-semibold block mb-3">
+                  Classes 9 and 10 (Ages 14–16)
+                </span>
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  Comprehensive preparation for Secondary School Certificate (SSC) Matriculation board examinations with subject specializations.
+                </p>
+                <ul className="space-y-1.5 text-xs text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+                    <span className="font-semibold text-slate-800">Science Group:</span>
+                    <span>Physics, Chemistry, Biology / Computer</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+                    <span className="font-semibold text-slate-800">Humanities Group:</span>
+                    <span>General Science, Civics & Arts</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+                    <span>Mathematics (Advanced / General)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+                    <span>Science Lab Practicals & Past Papers</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                <span className="text-xs font-semibold text-blue-900">Secondary Certificate Readiness</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 6. INFORMATION FOR PARENTS, STUDENTS & COMMUNITY                          */}
+      {/* ========================================================================= */}
+      <section id="pathways" className="py-16 sm:py-20 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-900 block mb-1">
+              School Community
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
+              Information Tailored to Your Role
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600">
+              Select your role to quickly access relevant guidelines, fees, schedules, and portal services.
+            </p>
+          </div>
+
+          {/* Role Selection Tabs */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setSelectedRole('parent')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedRole === 'parent'
+                    ? 'bg-white text-blue-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Parents & Guardians
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('student')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedRole === 'student'
+                    ? 'bg-white text-blue-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Enrolled Students
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('alumni')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedRole === 'alumni'
+                    ? 'bg-white text-blue-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Graduates & Alumni
+              </button>
+            </div>
+          </div>
+
+          {/* Active Role Content Card */}
+          <div className="max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border border-slate-200 bg-[#FBF9F5] shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="md:col-span-7 space-y-3">
+                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-900 inline-block">
+                  {currentPathway.badge}
+                </span>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-slate-900">
                   {currentPathway.title}
-                </h4>
-                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-light">
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {currentPathway.description}
                 </p>
 
-                {/* Key Highlights */}
-                <div className="pt-2">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 block mb-2">
-                    Key Features for this Role
-                  </span>
-                  <ul className="space-y-2">
-                    {currentPathway.keyHighlights.map((hl, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-xs text-stone-300">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>{hl}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="pt-2 space-y-1.5">
+                  {currentPathway.keyHighlights.map((hl, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs text-slate-700">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{hl}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* Action Buttons Tray */}
-              <div className="lg:col-span-5 p-6 rounded-xl bg-[#070E1C] border border-blue-950 flex flex-col justify-between space-y-4">
-                <div>
-                  <span className="text-[11px] font-mono text-stone-400 uppercase tracking-wider block mb-1">
-                    Recommended Next Steps
-                  </span>
-                  <h5 className="text-sm font-semibold text-stone-100 mb-3">
-                    Fast-Track Gateway
-                  </h5>
-                </div>
+              <div className="md:col-span-5 p-5 rounded-xl bg-white border border-slate-200 space-y-3 shadow-2xs">
+                <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
+                  Quick Access
+                </span>
+                <a
+                  href={currentPathway.primaryAction.href}
+                  onClick={(e) => {
+                    if (currentPathway.primaryAction.href.startsWith('#portal')) {
+                      e.preventDefault();
+                      if (onOpenPortalModal) onOpenPortalModal();
+                    } else if (currentPathway.primaryAction.href === '#admissions-apply') {
+                      e.preventDefault();
+                      const target = document.querySelector('#admissions');
+                      target?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-full py-2.5 px-3 rounded-lg text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <span>{currentPathway.primaryAction.label}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
 
-                <div className="space-y-2.5">
+                {currentPathway.secondaryActions.map((sec, idx) => (
                   <a
-                    href={currentPathway.primaryAction.href}
+                    key={idx}
+                    href={sec.href}
                     onClick={(e) => {
-                      if (currentPathway.primaryAction.href.startsWith('#portal')) {
+                      if (sec.href === '#location') {
+                        e.preventDefault();
+                        const target = document.querySelector('#location');
+                        target?.scrollIntoView({ behavior: 'smooth' });
+                      } else if (sec.href === '#fee-schedule') {
+                        e.preventDefault();
+                        const target = document.querySelector('#admissions');
+                        target?.scrollIntoView({ behavior: 'smooth' });
+                      } else if (sec.href.includes('portal')) {
                         e.preventDefault();
                         if (onOpenPortalModal) onOpenPortalModal();
-                      } else if (currentPathway.primaryAction.href === '#admissions-apply') {
-                        e.preventDefault();
-                        if (onOpenApplyModal) onOpenApplyModal();
-                        else if (onShowToast) onShowToast('Admissions Application opened.');
                       }
                     }}
-                    className="w-full py-3 px-4 rounded-xl text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-colors shadow-md flex items-center justify-center gap-2"
+                    className="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors flex items-center justify-between"
                   >
-                    <span>{currentPathway.primaryAction.label}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>{sec.label}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                   </a>
-
-                  {currentPathway.secondaryActions.map((sec, idx) => (
-                    <a
-                      key={idx}
-                      href={sec.href}
-                      onClick={(e) => {
-                        if (sec.href === '#fee-schedule' || sec.href === '#book-tour') {
-                          e.preventDefault();
-                          setIsTourModalOpen(true);
-                        } else if (sec.href.includes('portal')) {
-                          e.preventDefault();
-                          if (onOpenPortalModal) onOpenPortalModal();
-                        } else if (onShowToast) {
-                          e.preventDefault();
-                          onShowToast(`Navigating to ${sec.label}...`);
-                        }
-                      }}
-                      className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-stone-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors flex items-center justify-between"
-                    >
-                      <span>{sec.label}</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-stone-500" />
-                    </a>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -802,149 +760,83 @@ export const Home: React.FC<HomeProps> = ({
       </section>
 
       {/* ========================================================================= */}
-      {/* TASK 3: HORIZONTAL STORYTELLING BLOCK (SCROLL-LINKED ANIMATION)            */}
+      {/* 7. PHOTO LIGHTBOX MODAL                                                   */}
       {/* ========================================================================= */}
-      <section
-        ref={horizontalSectionRef}
-        className="relative h-[300vh] bg-[#070E1C] border-b border-blue-950"
-        aria-label="Campus Walkthrough Storytelling"
-      >
-        {/* Sticky Viewport Container */}
-        <div className="sticky top-20 h-[88vh] overflow-hidden flex flex-col justify-between py-6">
-          {/* Header Bar within Sticky Viewport */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-blue-950 shrink-0">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono uppercase tracking-widest text-blue-400">
-                  Interactive Campus Walkthrough
-                </span>
-                <span className="text-stone-600">·</span>
-                <span className="text-xs text-amber-400 font-mono">Scroll Down to Traverse</span>
-              </div>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-stone-100 mt-1">
-                A Physical Journey Through The Mount Uni
-              </h2>
-            </div>
-
-            {/* Horizontal Scroll Progress Bar */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-stone-400 whitespace-nowrap">Campus Depth:</span>
-              <div className="w-36 h-2 rounded-full bg-slate-900 border border-blue-950 overflow-hidden">
-                <motion.div
-                  style={{ width: progressPercent }}
-                  className="h-full bg-amber-400 rounded-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Horizontally Translating Container of 4 Large Cards */}
-          <div className="w-full overflow-hidden flex items-center flex-1 my-auto">
-            <motion.div
-              style={{ x: xTransform }}
-              className="flex gap-8 pl-6 sm:pl-16 pr-16 w-max"
+      {activePhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+          onClick={() => setActivePhoto(null)}
+        >
+          <div
+            className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setActivePhoto(null)}
+              aria-label="Close photo view"
+              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white transition-colors"
             >
-              {STORY_CARDS.map((card) => (
-                <div
-                  key={card.id}
-                  className={`w-[85vw] sm:w-[540px] lg:w-[620px] rounded-3xl border border-blue-900/60 bg-gradient-to-br ${card.gradient} p-8 sm:p-10 shadow-2xl flex flex-col justify-between shrink-0 relative overflow-hidden group`}
-                >
-                  {/* Subtle Background Icon Watermark */}
-                  <div className="absolute -right-8 -bottom-8 opacity-5 text-white pointer-events-none transform rotate-12">
-                    {card.icon === 'BookOpen' && <BookOpen className="w-64 h-64" />}
-                    {card.icon === 'ShieldCheck' && <ShieldCheck className="w-64 h-64" />}
-                    {card.icon === 'Trophy' && <Trophy className="w-64 h-64" />}
-                    {card.icon === 'Cpu' && <Cpu className="w-64 h-64" />}
-                  </div>
+              <X className="w-4 h-4" />
+            </button>
 
-                  <div>
-                    {/* Card Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className={`text-xs font-mono font-bold tracking-widest ${card.accentColor}`}>
-                        {card.step}
-                      </span>
-                      <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#070E1C] border border-blue-950 text-stone-400">
-                        {card.pillar}
-                      </span>
-                    </div>
-
-                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-stone-100 mb-2 leading-tight">
-                      {card.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-stone-300 font-light leading-relaxed mb-6">
-                      {card.description}
-                    </p>
-
-                    {/* Metric Spotlight */}
-                    <div className="p-4 rounded-xl bg-[#070E1C]/80 border border-blue-950 mb-6 flex items-center gap-4">
-                      <span className="font-serif text-3xl sm:text-4xl font-bold text-amber-400 tabular-nums">
-                        {card.metrics.value}
-                      </span>
-                      <span className="text-xs text-stone-300 font-medium leading-snug">
-                        {card.metrics.label}
-                      </span>
-                    </div>
-
-                    {/* Highlights */}
-                    <ul className="space-y-2">
-                      {card.highlights.map((h, i) => (
-                        <li key={i} className="flex items-center gap-2.5 text-xs text-stone-300">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span>{h}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Card Action Link */}
-                  <div className="pt-6 mt-6 border-t border-blue-950 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (card.id === 'academics' && onOpenMatrixModal) {
-                          onOpenMatrixModal();
-                        } else {
-                          setIsTourModalOpen(true);
-                        }
-                      }}
-                      className="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-                    >
-                      <span>Explore {card.pillar.split('&')[0].trim()} Facilities</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="text-[11px] font-mono text-stone-500">
-                      The Mount Uni Quad
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Bottom Milestone Stepper */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full shrink-0 pt-3 border-t border-blue-950 flex flex-wrap items-center justify-between text-xs text-stone-400">
-            <div className="flex items-center gap-6 overflow-x-auto py-1">
-              {STORY_CARDS.map((c, idx) => (
-                <div key={c.id} className="flex items-center gap-2 whitespace-nowrap">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  <span className="font-mono text-[11px] text-stone-300 font-medium">
-                    {c.pillar.split('&')[0].trim()}
-                  </span>
-                </div>
-              ))}
+            {/* Photo */}
+            <div className="relative h-72 sm:h-96 w-full bg-slate-100">
+              <img
+                src={activePhoto.image}
+                alt={activePhoto.title}
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div className="hidden sm:block text-[11px] text-stone-500 font-mono">
-              Continuous Campus Panorama
+
+            {/* Content Details */}
+            <div className="p-6 text-left">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900">
+                  {activePhoto.serial} · {activePhoto.year}
+                </span>
+                <span className="text-xs text-slate-500 font-mono">
+                  {activePhoto.coordinates}
+                </span>
+              </div>
+              <h3 className="font-serif text-xl font-bold text-slate-900">
+                {activePhoto.title}
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                {activePhoto.summary}
+              </p>
+
+              {/* Highlights */}
+              <div className="mt-4 pt-3 border-t border-slate-200">
+                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">
+                  Facility Specifications
+                </span>
+                <ul className="space-y-1 text-xs text-slate-600">
+                  {activePhoto.specifications.map((spec, sIdx) => (
+                    <li key={sIdx} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                      <span>{spec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setActivePhoto(null)}
+                  className="px-4 py-2 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  Close Photo
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Virtual Tour Modal */}
-      <VirtualTourModal
-        isOpen={isTourModalOpen}
-        onClose={() => setIsTourModalOpen(false)}
-      />
+      )}
     </div>
   );
 };

@@ -19,14 +19,12 @@ import {
   Building,
   HelpCircle,
   Layers,
+  BookOpen,
 } from 'lucide-react';
 import {
   db,
   collection,
   addDoc,
-  serverTimestamp,
-  handleFirestoreError,
-  OperationType,
 } from '../lib/firebase';
 
 // Types for Admissions Form
@@ -63,8 +61,8 @@ const INITIAL_FORM: ApplicationFormData = {
   studentName: '',
   dob: '',
   gender: 'Male',
-  gradeApplied: 'Senior Cambridge A-Levels (Grade 11)',
-  stream: 'Cambridge International (CAIE)',
+  gradeApplied: 'Class 6 (Middle School)',
+  stream: 'General Studies (Classes 1–8)',
   parentName: '',
   relationship: 'Father',
   parentEmail: '',
@@ -72,7 +70,7 @@ const INITIAL_FORM: ApplicationFormData = {
   occupation: '',
   residentialAddress: '',
   previousSchool: '',
-  lastCompletedGrade: 'Grade 10 / Matric / O-Levels',
+  lastCompletedGrade: 'Class 5',
   previousMarksOrGpa: '',
   achievements: '',
   birthCertificateUploaded: false,
@@ -81,7 +79,7 @@ const INITIAL_FORM: ApplicationFormData = {
   agreeToTerms: false,
 };
 
-// Pricing Tiers for Calculator
+// Pricing Tiers for Calculator (Classes 1 to 10 ONLY)
 interface GradeFeeConfig {
   admissionFee: number;
   securityDeposit: number;
@@ -89,29 +87,24 @@ interface GradeFeeConfig {
 }
 
 const GRADE_FEES: Record<string, GradeFeeConfig> = {
-  'Early Years (EYFS)': { admissionFee: 65000, securityDeposit: 25000, monthlyTuition: 38000 },
-  'Primary School (Grades 1-5)': { admissionFee: 75000, securityDeposit: 30000, monthlyTuition: 45000 },
-  'Middle School (Grades 6-8)': { admissionFee: 85000, securityDeposit: 35000, monthlyTuition: 52000 },
-  'Cambridge O-Levels (Grades 9-10)': { admissionFee: 95000, securityDeposit: 40000, monthlyTuition: 64000 },
-  'Cambridge A-Levels (Grades 11-12)': { admissionFee: 110000, securityDeposit: 50000, monthlyTuition: 78000 },
-  'BISE Matriculation (Grades 9-10)': { admissionFee: 70000, securityDeposit: 25000, monthlyTuition: 42000 },
-  'BISE FSc Pre-Med / Pre-Eng (11-12)': { admissionFee: 85000, securityDeposit: 30000, monthlyTuition: 48000 },
+  'Primary School (Classes 1–5)': { admissionFee: 25000, securityDeposit: 15000, monthlyTuition: 12000 },
+  'Middle School (Classes 6–8)': { admissionFee: 30000, securityDeposit: 15000, monthlyTuition: 15000 },
+  'Secondary School — Science Group (Classes 9–10)': { admissionFee: 35000, securityDeposit: 20000, monthlyTuition: 18500 },
+  'Secondary School — Humanities Group (Classes 9–10)': { admissionFee: 35000, securityDeposit: 20000, monthlyTuition: 17000 },
 };
 
 const TRANSPORT_ZONES: Record<string, number> = {
   'No Transport (Self Commute)': 0,
-  'Zone 1: Cantonment, Main Mall, Gulberg (Within 8 km)': 8500,
-  'Zone 2: DHA Phase 1-6, Model Town, Garden Town (8-16 km)': 12500,
-  'Zone 3: Johar Town, Wapda Town, Lake City (16-25 km)': 16000,
-  'Zone 4: Bahria Town, Raiwind Campus Shuttle (25+ km)': 19500,
+  'Zone 1: School Vicinity & Nearby Sectors (Within 5 km)': 4500,
+  'Zone 2: Main Town & Connecting Corridors (5–12 km)': 6500,
+  'Zone 3: Outer Townships & Extended Suburbs (12–20 km)': 8500,
 };
 
 const EXTRA_FACILITIES = [
-  { id: 'robotics', label: 'Turing Robotics & AI Lab Guild', fee: 6500 },
-  { id: 'equestrian', label: 'Equestrian Polo & Horse Riding Club', fee: 14000 },
-  { id: 'olympiad', label: 'International Olympiad Mentorship (Math/Physics)', fee: 8000 },
-  { id: 'cafeteria', label: 'Nutritional Campus Lunch & Tea Plan', fee: 11500 },
-  { id: 'boarding', label: 'Residential Boarding House (Full Term)', fee: 45000 },
+  { id: 'computing', label: 'Computer & IT Laboratory Practical Sessions', fee: 1500 },
+  { id: 'science_lab', label: 'Science Laboratory Materials (Physics, Chemistry, Biology)', fee: 2000 },
+  { id: 'library', label: 'Library & Reading Room Resource Fund', fee: 1000 },
+  { id: 'sports', label: 'School Sports & Physical Education Programme', fee: 1200 },
 ];
 
 export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
@@ -125,9 +118,9 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
   const [submittedApplicationId, setSubmittedApplicationId] = useState<string | null>(null);
 
   // Dynamic Fee Calculator state
-  const [calcGrade, setCalcGrade] = useState<string>('Cambridge A-Levels (Grades 11-12)');
-  const [calcTransport, setCalcTransport] = useState<string>('Zone 2: DHA Phase 1-6, Model Town, Garden Town (8-16 km)');
-  const [calcFacilities, setCalcFacilities] = useState<string[]>(['robotics']);
+  const [calcGrade, setCalcGrade] = useState<string>('Middle School (Classes 6–8)');
+  const [calcTransport, setCalcTransport] = useState<string>('Zone 1: School Vicinity & Nearby Sectors (Within 5 km)');
+  const [calcFacilities, setCalcFacilities] = useState<string[]>(['computing', 'library']);
 
   // Calculated results
   const [feeBreakdown, setFeeBreakdown] = useState({
@@ -140,9 +133,9 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
     regularMonthlyTotal: 0,
   });
 
-  // Task 2: Dynamic Fee & Transport Calculator using useEffect
+  // Dynamic Fee & Transport Calculator
   useEffect(() => {
-    const gradeConfig = GRADE_FEES[calcGrade] || GRADE_FEES['Cambridge A-Levels (Grades 11-12)'];
+    const gradeConfig = GRADE_FEES[calcGrade] || GRADE_FEES['Middle School (Classes 6–8)'];
     const transportFee = TRANSPORT_ZONES[calcTransport] || 0;
 
     let facilityTotal = 0;
@@ -172,8 +165,6 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
   // Validation function per step
   const validateStep = (step: number): boolean => {
     const errors: Record<string, string> = {};
-
-    // Standard regex validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^(\+?[0-9\s\-]{9,18})$/;
 
@@ -227,7 +218,7 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
     if (!validateStep(4)) return;
 
     setIsSubmitting(true);
-    const appId = `MU-2027-${Math.floor(100000 + Math.random() * 900000)}`;
+    const appId = `SCH-2027-${Math.floor(100000 + Math.random() * 900000)}`;
 
     try {
       await addDoc(collection(db, 'applications'), {
@@ -247,11 +238,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
       setSubmittedApplicationId(appId);
       if (onShowToast) {
-        onShowToast(`Application ${appId} successfully recorded in admissions registry.`);
+        onShowToast(`Application ${appId} successfully registered.`);
       }
     } catch (error) {
-      console.warn('Admissions Firestore submission notice:', error);
-      // Fallback offline confirmation to guarantee pristine user journey
+      console.warn('Admissions submission notice:', error);
+      // Fallback offline confirmation
       setSubmittedApplicationId(appId);
       if (onShowToast) {
         onShowToast(`Application ${appId} recorded successfully.`);
@@ -272,7 +263,7 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
   // Step transition animation variants
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 80 : -80,
+      x: direction > 0 ? 50 : -50,
       opacity: 0,
     }),
     center: {
@@ -280,72 +271,74 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
       opacity: 1,
     },
     exit: (direction: number) => ({
-      x: direction < 0 ? 80 : -80,
+      x: direction < 0 ? 50 : -50,
       opacity: 0,
     }),
   };
 
   return (
-    <section id="admissions" className="py-24 bg-[#070E1C] text-stone-100 border-b border-blue-950 relative overflow-hidden">
+    <section id="admissions" className="py-20 sm:py-24 bg-[#FBF9F5] text-slate-800 border-b border-slate-200 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-3xl mb-16 pb-6 border-b border-blue-950/80">
-          <span className="text-xs font-mono uppercase tracking-widest text-amber-400 block mb-2">
-            Admissions Plane & Candidate Registry
-          </span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-stone-100">
-            Apply to The Mount Uni — Cohort 2027
+        <div className="max-w-3xl mb-14 pb-6 border-b border-slate-200">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#1B365D] uppercase tracking-wider mb-2">
+            <span>Admissions Desk</span>
+            <span>·</span>
+            <span>Classes 1 to 10 Only</span>
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1B365D]">
+            Student Admissions & Fee Guide
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-stone-300 font-light leading-relaxed">
-            Welcome prospective candidates and families. Complete our multi-stage application portal or simulate your precise tuition breakdown using our transparent dynamic fee engine.
+          <p className="mt-3 text-sm sm:text-base text-slate-600 font-light leading-relaxed">
+            Welcome prospective parents and guardians. Complete our clear 4-step admission application form or calculate your expected tuition fees with our transparent fee breakdown.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* ======================================================== */}
           {/* TASK 1: Controlled Multi-Step Application Form (7 cols) */}
           {/* ======================================================== */}
-          <div className="lg:col-span-7 rounded-2xl bg-[#0B1528] border border-blue-950 p-6 sm:p-8 shadow-2xl relative">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-blue-950">
+          <div className="lg:col-span-7 rounded-2xl bg-white border border-slate-200 p-6 sm:p-8 shadow-sm relative">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
               <div>
-                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block">
-                  Official Registry
+                <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block">
+                  Official Registration
                 </span>
-                <h3 className="font-serif text-xl font-bold text-stone-100">
-                  Candidate Matriculation Form
+                <h3 className="font-serif text-xl font-bold text-[#1B365D]">
+                  Student Admission Form
                 </h3>
               </div>
-              <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-[#070E1C] text-amber-300 border border-amber-500/30">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
                 Step {currentStep} of 4
               </span>
             </div>
 
             {/* Animated Progress Bar */}
-            <div className="w-full bg-[#070E1C] rounded-full h-2 mb-8 overflow-hidden border border-blue-950">
+            <div className="w-full bg-slate-100 rounded-full h-2 mb-6 overflow-hidden border border-slate-200">
               <motion.div
-                className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 rounded-full"
+                className="h-full bg-gradient-to-r from-[#1B365D] to-blue-600 rounded-full"
                 initial={{ width: '25%' }}
                 animate={{ width: `${(currentStep / 4) * 100}%` }}
                 transition={{ duration: 0.35, ease: 'easeInOut' }}
               />
             </div>
 
-            {/* Step Navigation Pill Indicators */}
+            {/* Step Indicators */}
             <div className="grid grid-cols-4 gap-2 mb-8 text-[11px] font-medium text-center">
               {[
-                { num: 1, label: 'Student Info' },
-                { num: 2, label: 'Guardians' },
-                { num: 3, label: 'Academia' },
+                { num: 1, label: 'Student' },
+                { num: 2, label: 'Parents' },
+                { num: 3, label: 'Academic' },
                 { num: 4, label: 'Documents' },
               ].map((s) => (
                 <div
                   key={s.num}
-                  className={`py-1.5 px-1 rounded-lg border transition-all ${
+                  className={`py-2 px-1 rounded-lg border transition-all ${
                     currentStep === s.num
-                      ? 'bg-amber-400/10 border-amber-400 text-amber-300 font-semibold'
+                      ? 'bg-blue-50 border-blue-400 text-[#1B365D] font-bold'
                       : currentStep > s.num
-                      ? 'bg-[#070E1C] border-blue-900 text-stone-300'
-                      : 'bg-[#070E1C]/50 border-blue-950/60 text-stone-500'
+                      ? 'bg-slate-50 border-slate-200 text-slate-600'
+                      : 'bg-white border-slate-200 text-slate-400'
                   }`}
                 >
                   <span className="block text-[10px] font-mono">0{s.num}</span>
@@ -359,30 +352,30 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="p-8 text-center rounded-2xl bg-[#070E1C] border border-amber-500/40"
+                className="p-8 text-center rounded-2xl bg-emerald-50/50 border border-emerald-200"
               >
-                <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h4 className="font-serif text-2xl font-bold text-stone-100 mb-2">
-                  Application Successfully Lodged
+                <h4 className="font-serif text-2xl font-bold text-slate-900 mb-2">
+                  Application Successfully Submitted
                 </h4>
-                <p className="text-xs text-stone-300 max-w-md mx-auto mb-6">
-                  Thank you, <strong className="text-amber-300">{formData.parentName}</strong>. The application dossier for candidate <strong className="text-amber-300">{formData.studentName}</strong> has been assigned to the Academic Admissions Council.
+                <p className="text-sm text-slate-600 max-w-md mx-auto mb-6">
+                  Thank you, <strong className="text-slate-900">{formData.parentName}</strong>. The application for student <strong className="text-slate-900">{formData.studentName}</strong> has been received by our School Admissions Office.
                 </p>
 
-                <div className="p-4 rounded-xl bg-[#0B1528] border border-blue-950 max-w-sm mx-auto mb-6 text-left text-xs space-y-2 font-mono">
+                <div className="p-4 rounded-xl bg-white border border-slate-200 max-w-sm mx-auto mb-6 text-left text-xs space-y-2 font-mono">
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Application ID:</span>
-                    <span className="font-bold text-amber-400">{submittedApplicationId}</span>
+                    <span className="text-slate-500">Application ID:</span>
+                    <span className="font-bold text-[#1B365D]">{submittedApplicationId}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Target Grade:</span>
-                    <span className="text-stone-200">{formData.gradeApplied}</span>
+                    <span className="text-slate-500">Class Applied:</span>
+                    <span className="text-slate-800">{formData.gradeApplied}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Registry Status:</span>
-                    <span className="text-emerald-400 font-semibold">Under Review</span>
+                    <span className="text-slate-500">Current Status:</span>
+                    <span className="text-emerald-700 font-semibold">Under Review</span>
                   </div>
                 </div>
 
@@ -390,13 +383,13 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      if (onShowToast) onShowToast('Generating official Application Receipt PDF...');
+                      if (onShowToast) onShowToast('Generating printable Application Confirmation...');
                       window.print();
                     }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-colors shadow-lg shadow-amber-500/20"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#132742] transition-colors shadow-sm"
                   >
                     <Download className="w-4 h-4" />
-                    Print Official Receipt
+                    Print Receipt
                   </button>
                   <button
                     type="button"
@@ -405,14 +398,14 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                       setFormData(INITIAL_FORM);
                       setCurrentStep(1);
                     }}
-                    className="px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-300 hover:text-white bg-[#0B1528] border border-blue-950"
+                    className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 border border-slate-200"
                   >
                     Submit Another Application
                   </button>
                 </div>
               </motion.div>
             ) : (
-              /* Step-by-Step Multi-Step Form with AnimatePresence */
+              /* Step-by-Step Multi-Step Form */
               <form onSubmit={handleSubmitApplication}>
                 <div className="min-h-[340px] relative">
                   <AnimatePresence mode="wait">
@@ -425,16 +418,16 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         animate="center"
                         exit="exit"
                         custom={1}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.25 }}
                         className="space-y-4"
                       >
-                        <h4 className="text-sm font-serif font-bold text-stone-200 pb-2 border-b border-blue-950">
-                          Step 1: Student Particulars
+                        <h4 className="text-sm font-serif font-bold text-slate-800 pb-2 border-b border-slate-100">
+                          Step 1: Student Details
                         </h4>
 
                         <div>
-                          <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                            Full Legal Name of Candidate *
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Full Name of Student *
                           </label>
                           <input
                             type="text"
@@ -442,11 +435,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                             onChange={(e) =>
                               setFormData({ ...formData, studentName: e.target.value })
                             }
-                            placeholder="e.g. Zayd Alexander Hashmi"
-                            className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                            placeholder="e.g. Muhammad Ali Khan"
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D] focus:ring-1 focus:ring-[#1B365D]"
                           />
                           {formErrors.studentName && (
-                            <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                            <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                               <AlertCircle className="w-3 h-3" />
                               {formErrors.studentName}
                             </p>
@@ -455,17 +448,17 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                               Date of Birth *
                             </label>
                             <input
                               type="date"
                               value={formData.dob}
                               onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D] focus:ring-1 focus:ring-[#1B365D]"
                             />
                             {formErrors.dob && (
-                              <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                              <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
                                 {formErrors.dob}
                               </p>
@@ -473,7 +466,7 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                               Gender
                             </label>
                             <select
@@ -484,7 +477,7 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                                   gender: e.target.value as 'Male' | 'Female' | 'Other',
                                 })
                               }
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             >
                               <option value="Male">Male</option>
                               <option value="Female">Female</option>
@@ -495,40 +488,47 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Grade Level Applied
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Class Applied (1 to 10 Only)
                             </label>
                             <select
                               value={formData.gradeApplied}
                               onChange={(e) =>
                                 setFormData({ ...formData, gradeApplied: e.target.value })
                               }
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             >
-                              <option value="Early Years (EYFS)">Early Years (EYFS)</option>
-                              <option value="Primary School (Grades 1-5)">Primary School (Grades 1-5)</option>
-                              <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
-                              <option value="Cambridge O-Levels (Grades 9-10)">Cambridge O-Levels (Grades 9-10)</option>
-                              <option value="Cambridge A-Levels (Grades 11-12)">Cambridge A-Levels (Grades 11-12)</option>
-                              <option value="BISE Matriculation (Grades 9-10)">BISE Matriculation (Grades 9-10)</option>
-                              <option value="BISE FSc Pre-Med / Pre-Eng (11-12)">BISE FSc Pre-Med / Pre-Eng (11-12)</option>
+                              <option value="Class 1 (Primary School)">Class 1 (Primary)</option>
+                              <option value="Class 2 (Primary School)">Class 2 (Primary)</option>
+                              <option value="Class 3 (Primary School)">Class 3 (Primary)</option>
+                              <option value="Class 4 (Primary School)">Class 4 (Primary)</option>
+                              <option value="Class 5 (Primary School)">Class 5 (Primary)</option>
+                              <option value="Class 6 (Middle School)">Class 6 (Middle School)</option>
+                              <option value="Class 7 (Middle School)">Class 7 (Middle School)</option>
+                              <option value="Class 8 (Middle School)">Class 8 (Middle School)</option>
+                              <option value="Class 9 (Secondary School)">Class 9 (Secondary School)</option>
+                              <option value="Class 10 (Secondary School)">Class 10 (Secondary School)</option>
                             </select>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Academic Stream
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Curriculum Group
                             </label>
                             <select
                               value={formData.stream}
                               onChange={(e) =>
                                 setFormData({ ...formData, stream: e.target.value })
                               }
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             >
-                              <option value="Cambridge International (CAIE)">Cambridge International (CAIE)</option>
-                              <option value="National Board (BISE)">National Board (BISE Matric/FSc)</option>
-                              <option value="Dual Track Accelerated Honors">Dual Track Accelerated Honors</option>
+                              <option value="General Studies (Classes 1–8)">General School Studies (Classes 1–8)</option>
+                              <option value="Secondary Science Group (Physics, Chem, Bio/Comp) (Classes 9–10)">
+                                Secondary Science Group (Classes 9–10)
+                              </option>
+                              <option value="Secondary Humanities Group (Arts & General Science) (Classes 9–10)">
+                                Secondary Humanities Group (Classes 9–10)
+                              </option>
                             </select>
                           </div>
                         </div>
@@ -544,16 +544,16 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         animate="center"
                         exit="exit"
                         custom={1}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.25 }}
                         className="space-y-4"
                       >
-                        <h4 className="text-sm font-serif font-bold text-stone-200 pb-2 border-b border-blue-950">
-                          Step 2: Parent & Guardian Contact
+                        <h4 className="text-sm font-serif font-bold text-slate-800 pb-2 border-b border-slate-100">
+                          Step 2: Parent & Guardian Details
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="sm:col-span-2">
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                               Parent / Guardian Name *
                             </label>
                             <input
@@ -562,11 +562,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               onChange={(e) =>
                                 setFormData({ ...formData, parentName: e.target.value })
                               }
-                              placeholder="e.g. Dr. Salman Hashmi"
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              placeholder="e.g. Tariq Mehmood"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             />
                             {formErrors.parentName && (
-                              <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                              <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
                                 {formErrors.parentName}
                               </p>
@@ -574,8 +574,8 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Relation
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Relationship
                             </label>
                             <select
                               value={formData.relationship}
@@ -585,19 +585,19 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                                   relationship: e.target.value as 'Father' | 'Mother' | 'Guardian',
                                 })
                               }
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             >
                               <option value="Father">Father</option>
                               <option value="Mother">Mother</option>
-                              <option value="Guardian">Legal Guardian</option>
+                              <option value="Guardian">Guardian</option>
                             </select>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Official Email Address *
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Email Address *
                             </label>
                             <input
                               type="email"
@@ -605,11 +605,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               onChange={(e) =>
                                 setFormData({ ...formData, parentEmail: e.target.value })
                               }
-                              placeholder="salman.hashmi@alumni.org"
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              placeholder="parent@example.com"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             />
                             {formErrors.parentEmail && (
-                              <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                              <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
                                 {formErrors.parentEmail}
                               </p>
@@ -617,8 +617,8 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Emergency Mobile Phone *
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Contact Mobile Phone *
                             </label>
                             <input
                               type="tel"
@@ -626,11 +626,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               onChange={(e) =>
                                 setFormData({ ...formData, parentPhone: e.target.value })
                               }
-                              placeholder="+92 300 8472910"
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              placeholder="+92 300 1234567"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             />
                             {formErrors.parentPhone && (
-                              <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                              <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
                                 {formErrors.parentPhone}
                               </p>
@@ -639,8 +639,8 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                            Residential Postal Address *
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Residential Address *
                           </label>
                           <input
                             type="text"
@@ -648,11 +648,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                             onChange={(e) =>
                               setFormData({ ...formData, residentialAddress: e.target.value })
                             }
-                            placeholder="Plot 44-B, Sector Z, Phase 5, DHA"
-                            className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                            placeholder="House No., Street, Area/Sector, City"
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                           />
                           {formErrors.residentialAddress && (
-                            <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                            <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                               <AlertCircle className="w-3 h-3" />
                               {formErrors.residentialAddress}
                             </p>
@@ -670,16 +670,16 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         animate="center"
                         exit="exit"
                         custom={1}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.25 }}
                         className="space-y-4"
                       >
-                        <h4 className="text-sm font-serif font-bold text-stone-200 pb-2 border-b border-blue-950">
-                          Step 3: Prior Academic Record
+                        <h4 className="text-sm font-serif font-bold text-slate-800 pb-2 border-b border-slate-100">
+                          Step 3: Previous School Record
                         </h4>
 
                         <div>
-                          <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                            Previous School / Academy *
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Previous School / Institution *
                           </label>
                           <input
                             type="text"
@@ -687,11 +687,11 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                             onChange={(e) =>
                               setFormData({ ...formData, previousSchool: e.target.value })
                             }
-                            placeholder="e.g. Aitchison College / Beaconhouse / Lahore Grammar"
-                            className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                            placeholder="Name of previous school or Home-schooled"
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                           />
                           {formErrors.previousSchool && (
-                            <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                            <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                               <AlertCircle className="w-3 h-3" />
                               {formErrors.previousSchool}
                             </p>
@@ -700,8 +700,8 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Last Completed Grade
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Last Class Completed
                             </label>
                             <input
                               type="text"
@@ -709,14 +709,14 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               onChange={(e) =>
                                 setFormData({ ...formData, lastCompletedGrade: e.target.value })
                               }
-                              placeholder="Grade 10 / O-Levels"
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              placeholder="e.g. Class 5"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                              Cumulative GPA or Percentage
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Previous Marks / Grade
                             </label>
                             <input
                               type="text"
@@ -724,15 +724,15 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               onChange={(e) =>
                                 setFormData({ ...formData, previousMarksOrGpa: e.target.value })
                               }
-                              placeholder="e.g. 7 A*s / 3.92 GPA / 92%"
-                              className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                              placeholder="e.g. 88% or Grade A"
+                              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5">
-                            Special Distinctions, Honors & Olympiads
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Co-Curricular Interests or Achievements
                           </label>
                           <textarea
                             rows={3}
@@ -740,14 +740,14 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                             onChange={(e) =>
                               setFormData({ ...formData, achievements: e.target.value })
                             }
-                            placeholder="Kangourou Math medal, Model UN Best Delegate, Squash junior finalist..."
-                            className="w-full px-4 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400 resize-none"
+                            placeholder="Reading, debate, sports, science projects..."
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D] resize-none"
                           />
                         </div>
                       </motion.div>
                     )}
 
-                    {/* STEP 4: Document Upload UI */}
+                    {/* STEP 4: Document Verification */}
                     {currentStep === 4 && (
                       <motion.div
                         key="step-4"
@@ -756,35 +756,35 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         animate="center"
                         exit="exit"
                         custom={1}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.25 }}
                         className="space-y-4"
                       >
-                        <h4 className="text-sm font-serif font-bold text-stone-200 pb-2 border-b border-blue-950">
-                          Step 4: Document Dossier Verification
+                        <h4 className="text-sm font-serif font-bold text-slate-800 pb-2 border-b border-slate-100">
+                          Step 4: Required Documents Check
                         </h4>
 
-                        <p className="text-xs text-stone-400">
-                          Attach or verify official photocopies for credential verification.
+                        <p className="text-xs text-slate-500">
+                          Confirm that you have the following documents ready for physical or digital submission:
                         </p>
 
                         <div className="space-y-3">
                           {[
                             {
                               id: 'birthCertificateUploaded',
-                              title: 'Official Birth Certificate / Nadra B-Form',
-                              hint: 'PDF or JPG format, max 5MB',
+                              title: 'Official Birth Certificate / B-Form',
+                              hint: 'Photocopy or scanned document',
                               status: formData.birthCertificateUploaded,
                             },
                             {
                               id: 'transcriptUploaded',
-                              title: 'Most Recent Institutional Academic Transcript',
-                              hint: 'Signed and stamped by Principal / Registrar',
+                              title: 'Previous School Result Card / School Leaving Certificate',
+                              hint: 'Signed and stamped by previous school',
                               status: formData.transcriptUploaded,
                             },
                             {
                               id: 'photographUploaded',
-                              title: 'Candidate Passport Photograph (Blue Background)',
-                              hint: 'Clear front-facing formal portrait',
+                              title: 'Student Passport-Size Photographs (2)',
+                              hint: 'Recent color photos',
                               status: formData.photographUploaded,
                             },
                           ].map((doc) => (
@@ -798,33 +798,33 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                               }
                               className={`p-3.5 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
                                 doc.status
-                                  ? 'bg-emerald-950/20 border-emerald-500/50 text-emerald-200'
-                                  : 'bg-[#070E1C] border-blue-950 text-stone-300 hover:border-amber-500/40'
+                                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                               }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                                     doc.status
-                                      ? 'bg-emerald-500/20 text-emerald-400'
-                                      : 'bg-blue-950 text-stone-400'
+                                      ? 'bg-emerald-200 text-emerald-800'
+                                      : 'bg-slate-200 text-slate-600'
                                   }`}
                                 >
                                   <Upload className="w-4 h-4" />
                                 </div>
                                 <div>
                                   <span className="text-xs font-semibold block">{doc.title}</span>
-                                  <span className="text-[10px] text-stone-400">{doc.hint}</span>
+                                  <span className="text-[10px] text-slate-500">{doc.hint}</span>
                                 </div>
                               </div>
                               <span
-                                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
+                                className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
                                   doc.status
-                                    ? 'bg-emerald-500/20 text-emerald-300'
-                                    : 'bg-stone-800 text-stone-400'
+                                    ? 'bg-emerald-200 text-emerald-900'
+                                    : 'bg-slate-200 text-slate-600'
                                 }`}
                               >
-                                {doc.status ? 'Attached ✓' : 'Click to Upload'}
+                                {doc.status ? 'Ready ✓' : 'Mark Ready'}
                               </span>
                             </div>
                           ))}
@@ -832,21 +832,21 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
                         {/* Terms declaration */}
                         <div className="pt-2">
-                          <label className="flex items-start gap-2.5 text-xs text-stone-300 cursor-pointer">
+                          <label className="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer">
                             <input
                               type="checkbox"
                               checked={formData.agreeToTerms}
                               onChange={(e) =>
                                 setFormData({ ...formData, agreeToTerms: e.target.checked })
                               }
-                              className="mt-0.5 rounded text-amber-500 focus:ring-amber-400"
+                              className="mt-0.5 rounded text-[#1B365D] focus:ring-[#1B365D]"
                             />
                             <span>
-                              I solemnly affirm that the submitted academic records are genuine and acknowledge that admission offers are subject to verification by The Mount Uni Registrar.
+                              I affirm that the provided student details and academic records are accurate and understand that admission offers are confirmed following document verification.
                             </span>
                           </label>
                           {formErrors.agreeToTerms && (
-                            <p className="text-rose-400 text-[11px] mt-1 flex items-center gap-1">
+                            <p className="text-red-600 text-[11px] mt-1 flex items-center gap-1">
                               <AlertCircle className="w-3 h-3" />
                               {formErrors.agreeToTerms}
                             </p>
@@ -858,15 +858,15 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                 </div>
 
                 {/* Form Navigation Controls */}
-                <div className="flex items-center justify-between pt-6 mt-6 border-t border-blue-950">
+                <div className="flex items-center justify-between pt-6 mt-6 border-t border-slate-200">
                   {currentStep > 1 ? (
                     <button
                       type="button"
                       onClick={handlePrevStep}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-stone-300 hover:text-white bg-[#070E1C] border border-blue-950"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
-                      Previous Step
+                      Back
                     </button>
                   ) : (
                     <div />
@@ -876,7 +876,7 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                     <button
                       type="button"
                       onClick={handleNextStep}
-                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-all shadow-md shadow-amber-500/20"
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B365D] hover:bg-[#132742] transition-all shadow-sm"
                     >
                       Continue
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -885,17 +885,17 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B365D] hover:bg-[#132742] transition-all shadow-md disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <>
-                          <Sparkles className="w-4 h-4 animate-spin text-stone-950" />
-                          Registering Dossier...
+                          <Sparkles className="w-4 h-4 animate-spin text-white" />
+                          Submitting...
                         </>
                       ) : (
                         <>
                           <Check className="w-4 h-4" />
-                          Submit Candidate Dossier
+                          Submit Admission Form
                         </>
                       )}
                     </button>
@@ -908,36 +908,36 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
           {/* ======================================================== */}
           {/* TASK 2: Dynamic Fee & Transport Calculator (5 cols)     */}
           {/* ======================================================== */}
-          <div className="lg:col-span-5 rounded-2xl bg-[#0B1528] border border-blue-950 p-6 sm:p-8 shadow-2xl relative">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-blue-950">
+          <div className="lg:col-span-5 rounded-2xl bg-white border border-slate-200 p-6 sm:p-8 shadow-sm relative">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
               <div>
-                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block">
-                  Transparency Matrix
+                <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block">
+                  Transparent Schedule
                 </span>
-                <h3 className="font-serif text-xl font-bold text-stone-100 flex items-center gap-2">
-                  <Calculator className="w-5 h-5 text-amber-400" />
-                  Dynamic Fee Calculator
+                <h3 className="font-serif text-xl font-bold text-[#1B365D] flex items-center gap-2">
+                  <Calculator className="w-5 h-5 text-amber-600" />
+                  School Fee Calculator
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800 px-2 py-0.5 rounded">
-                Live Estimates
+              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">
+                Official Rates
               </span>
             </div>
 
-            <p className="text-xs text-stone-400 font-light mb-6">
-              Select your candidate's grade level, designated transport corridor, and optional co-curricular academies to compute your live tuition schedule.
+            <p className="text-xs text-slate-500 font-light mb-6">
+              Select your child's educational stage (Classes 1–10), optional school van route, and practical laboratory funds to calculate the live monthly schedule.
             </p>
 
             <div className="space-y-4 mb-6">
               {/* Dropdown 1: Grade Level */}
               <div>
-                <label className="block text-[11px] font-mono uppercase text-stone-300 mb-1.5">
-                  Academic Grade Level
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Educational Stage (Classes 1 to 10)
                 </label>
                 <select
                   value={calcGrade}
                   onChange={(e) => setCalcGrade(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                 >
                   {Object.keys(GRADE_FEES).map((grade) => (
                     <option key={grade} value={grade}>
@@ -949,14 +949,14 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
               {/* Dropdown 2: Transport Zone */}
               <div>
-                <label className="block text-[11px] font-mono uppercase text-stone-300 mb-1.5 flex items-center justify-between">
-                  <span>Executive Shuttle Transport Zone</span>
-                  <Bus className="w-3.5 h-3.5 text-amber-400" />
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>School Van / Transport Route</span>
+                  <Bus className="w-3.5 h-3.5 text-amber-600" />
                 </label>
                 <select
                   value={calcTransport}
                   onChange={(e) => setCalcTransport(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#070E1C] border border-blue-950 text-xs text-stone-200 focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#1B365D]"
                 >
                   {Object.keys(TRANSPORT_ZONES).map((zone) => (
                     <option key={zone} value={zone}>
@@ -968,8 +968,8 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
 
               {/* Checkboxes: Extra Facilities */}
               <div>
-                <label className="block text-[11px] font-mono uppercase text-stone-300 mb-2">
-                  Specialized Academies & Facilities (Optional)
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                  Academic Laboratories & Activity Funds (Optional)
                 </label>
                 <div className="space-y-2">
                   {EXTRA_FACILITIES.map((fac) => {
@@ -980,20 +980,20 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
                         onClick={() => toggleFacility(fac.id)}
                         className={`p-2.5 rounded-xl border cursor-pointer flex items-center justify-between text-xs transition-all ${
                           isChecked
-                            ? 'bg-amber-400/10 border-amber-500/40 text-stone-100 font-medium'
-                            : 'bg-[#070E1C] border-blue-950 text-stone-400 hover:border-blue-900'
+                            ? 'bg-blue-50/60 border-blue-300 text-slate-900 font-medium'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                           <input
                             type="checkbox"
                             checked={isChecked}
-                            onChange={() => {}} // Controlled by wrapper div
-                            className="rounded text-amber-500 focus:ring-amber-400"
+                            onChange={() => {}} // Controlled by wrapper
+                            className="rounded text-[#1B365D] focus:ring-[#1B365D]"
                           />
                           <span>{fac.label}</span>
                         </div>
-                        <span className="font-mono text-[11px] text-amber-400">
+                        <span className="font-mono text-[11px] text-[#1B365D] font-semibold">
                           +PKR {fac.fee.toLocaleString()}/mo
                         </span>
                       </div>
@@ -1004,83 +1004,83 @@ export const Admissions: React.FC<{ onShowToast?: (msg: string) => void }> = ({
             </div>
 
             {/* Live Breakdown Box */}
-            <div className="p-5 rounded-2xl bg-[#070E1C] border border-blue-900/60 shadow-inner space-y-3 text-xs">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400/90 block border-b border-blue-950 pb-2">
-                Itemized Institutional Ledger
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm space-y-3 text-xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 block border-b border-slate-200 pb-2">
+                Itemized Fee Estimate
               </span>
 
-              <div className="flex justify-between text-stone-400">
-                <span>Admission Fee (One-time, non-refundable):</span>
-                <span className="font-mono text-stone-200">
+              <div className="flex justify-between text-slate-600">
+                <span>Admission Fee (One-time):</span>
+                <span className="font-mono text-slate-900 font-medium">
                   PKR {feeBreakdown.admissionFee.toLocaleString()}
                 </span>
               </div>
 
-              <div className="flex justify-between text-stone-400">
+              <div className="flex justify-between text-slate-600">
                 <span>Security Deposit (One-time, refundable):</span>
-                <span className="font-mono text-stone-200">
+                <span className="font-mono text-slate-900 font-medium">
                   PKR {feeBreakdown.securityDeposit.toLocaleString()}
                 </span>
               </div>
 
-              <div className="flex justify-between text-stone-400">
+              <div className="flex justify-between text-slate-600">
                 <span>Base Monthly Tuition:</span>
-                <span className="font-mono text-stone-200">
+                <span className="font-mono text-slate-900 font-medium">
                   PKR {feeBreakdown.monthlyTuition.toLocaleString()}
                 </span>
               </div>
 
               {feeBreakdown.transportFee > 0 && (
-                <div className="flex justify-between text-stone-400">
-                  <span>Executive Shuttle Transport:</span>
-                  <span className="font-mono text-stone-200">
+                <div className="flex justify-between text-slate-600">
+                  <span>School Transport Fee:</span>
+                  <span className="font-mono text-slate-900 font-medium">
                     PKR {feeBreakdown.transportFee.toLocaleString()}
                   </span>
                 </div>
               )}
 
               {feeBreakdown.facilityTotal > 0 && (
-                <div className="flex justify-between text-stone-400">
-                  <span>Selected Facilities & Guilds:</span>
-                  <span className="font-mono text-stone-200">
+                <div className="flex justify-between text-slate-600">
+                  <span>Selected Laboratory / Activity Funds:</span>
+                  <span className="font-mono text-slate-900 font-medium">
                     PKR {feeBreakdown.facilityTotal.toLocaleString()}
                   </span>
                 </div>
               )}
 
               {/* Recurring Monthly Total */}
-              <div className="pt-3 border-t border-blue-950 flex justify-between items-baseline">
+              <div className="pt-3 border-t border-slate-200 flex justify-between items-baseline">
                 <div>
-                  <span className="text-xs font-semibold text-stone-200 block">
-                    Recurring Monthly Dues:
+                  <span className="text-xs font-bold text-[#1B365D] block">
+                    Regular Monthly Dues:
                   </span>
-                  <span className="text-[10px] text-stone-500">
+                  <span className="text-[10px] text-slate-500">
                     Tuition + Transport + Facilities
                   </span>
                 </div>
-                <span className="font-mono text-base font-bold text-amber-400">
+                <span className="font-mono text-base font-bold text-[#1B365D]">
                   PKR {feeBreakdown.regularMonthlyTotal.toLocaleString()}/mo
                 </span>
               </div>
 
               {/* Initial Settlement Total */}
-              <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-800/50 flex justify-between items-center mt-2">
+              <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex justify-between items-center mt-2">
                 <div>
-                  <span className="text-xs font-bold text-stone-100 block">
-                    First Month Settlement:
+                  <span className="text-xs font-bold text-[#1B365D] block">
+                    First Month Total Settlement:
                   </span>
-                  <span className="text-[10px] text-stone-400">
-                    Includes Admission, Deposit & Month 1
+                  <span className="text-[10px] text-slate-600">
+                    Admission + Security Deposit + 1st Month
                   </span>
                 </div>
-                <span className="font-mono text-lg font-bold text-amber-300">
+                <span className="font-mono text-base sm:text-lg font-bold text-amber-800">
                   PKR {feeBreakdown.firstMonthTotal.toLocaleString()}
                 </span>
               </div>
             </div>
 
-            <p className="text-[10px] text-stone-500 mt-4 text-center font-mono">
-              * Merit scholarships up to 100% available based on entrance assessment.
+            <p className="text-[11px] text-slate-500 mt-4 text-center font-sans">
+              * Sibling discounts and merit-based concessions are available upon inquiry at the school office.
             </p>
           </div>
         </div>

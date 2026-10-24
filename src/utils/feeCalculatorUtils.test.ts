@@ -5,23 +5,23 @@ import {
   validateCandidateApplication,
 } from './feeCalculatorUtils.ts';
 
-test('calculateInstitutionalFees computes exact breakdown for Cambridge A-Levels', () => {
+test('calculateInstitutionalFees computes exact breakdown for Classes 9-10 Secondary School', () => {
   const result = calculateInstitutionalFees({
     gradeFee: {
-      admissionFee: 110000,
-      securityDeposit: 50000,
-      monthlyTuition: 78000,
+      admissionFee: 25000,
+      securityDeposit: 10000,
+      monthlyTuition: 15000,
     },
-    transportFee: 12500, // Zone 2
-    facilityFees: [6500, 8000], // Robotics + Olympiad
+    transportFee: 4500, // School Bus Service
+    facilityFees: [2000, 1500], // Science Lab + Computer Lab
   });
 
-  assert.equal(result.admissionFee, 110000);
-  assert.equal(result.securityDeposit, 50000);
-  assert.equal(result.monthlyTuition, 78000);
-  assert.equal(result.facilityTotal, 14500);
-  assert.equal(result.regularMonthlyTotal, 78000 + 12500 + 14500); // 105,000
-  assert.equal(result.firstMonthTotal, 110000 + 50000 + 105000); // 265,000
+  assert.equal(result.admissionFee, 25000);
+  assert.equal(result.securityDeposit, 10000);
+  assert.equal(result.monthlyTuition, 15000);
+  assert.equal(result.facilityTotal, 3500);
+  assert.equal(result.regularMonthlyTotal, 15000 + 4500 + 3500); // 23,000
+  assert.equal(result.firstMonthTotal, 25000 + 10000 + 23000); // 58,000
 });
 
 test('validateCandidateApplication detects invalid emails and missing phone numbers', () => {

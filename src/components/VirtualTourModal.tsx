@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Compass, MapPin, Sparkles, Eye, ArrowRight, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Compass, MapPin, Sparkles, Eye, ArrowRight, Check, BookOpen, School, ExternalLink } from 'lucide-react';
 
 interface VirtualTourModalProps {
   isOpen: boolean;
@@ -13,50 +13,59 @@ interface TourLocation {
   subtitle: string;
   description: string;
   features: string[];
-  gradient: string;
+  image: string;
 }
 
 const TOUR_LOCATIONS: TourLocation[] = [
   {
-    id: 'quadrangle',
-    name: 'The Central Senate Quadrangle',
-    subtitle: 'Heart of Academic Ceremonies & Classical Clocktower',
+    id: 'corridor',
+    name: 'Academic Corridors & Tactile Walkway',
+    subtitle: 'Sheltered Arcades with Classic Red Brick Pillars',
     description:
-      'Spanning 8 acres of historic limestone walkways and manicured lawns, the Quadrangle is the daily gathering space for convocation, faculty processions, and open-air symposia.',
-    features: ['Neoclassical Clock Tower (1984)', 'Outdoor Reading Cloisters', 'Statue of the Founder Regents'],
-    gradient: 'from-amber-950/40 via-slate-900 to-slate-950',
+      'The central circulation artery of our school grounds, featuring durable red brick columns, clean terrazzo flooring, and yellow textured tactile guide paths ensuring safe, orderly student movement between periods.',
+    features: ['Classic red brick structural pillars', 'Textured tactile guide pathways', 'Natural cross-breeze ventilation'],
+    image: '/school-images/campus-corridor-colonnade.jpg',
   },
   {
-    id: 'library',
-    name: 'The Atrium Heritage Library',
-    subtitle: '4 Floors of Archival Repositories & Rare Manuscripts',
+    id: 'classrooms',
+    name: 'Classrooms for Classes 1 to 10',
+    subtitle: 'Spacious Wooden Bench-Desks & Bright Daylight',
     description:
-      'Home to over 180,000 physical volumes, climate-controlled rare book vaults, and 400 silent study carrels flooded with natural north skylight.',
-    features: ['Rare Cambridge & BISE Archives', 'Individual Postgraduate Carrels', 'JSTOR & ScienceDirect Terminals'],
-    gradient: 'from-blue-950/50 via-slate-900 to-slate-950',
+      'Carefully laid out student classrooms equipped with solid wood bench-desks, natural daylight windows, and ample board space to foster focused listening, neat penmanship, and daily teacher-student interaction.',
+    features: ['Comfortable wooden study benches', 'Generous natural daylight & ceiling fans', 'Attentive 1:18 teacher-student dynamic'],
+    image: '/school-images/classroom-daylight-desks.jpg',
   },
   {
-    id: 'steam',
-    name: 'The Sir Isaac Newton STEM & AI Hub',
-    subtitle: '12 Advanced Research & Robotic Benches',
+    id: 'library-sign',
+    name: 'B2 Reading Room & Library Entrance',
+    subtitle: 'Formal Black & Gold Lettered Gateway',
     description:
-      'Where theory converges with fabrication. Equipped with clean-room workstations, industrial 3D laser cutters, and supercomputing clusters for student machine learning projects.',
-    features: ['Autonomous Rover Testing Arena', 'Spectroscopy & Chemistry Benches', 'Class-100 Clean Hoods'],
-    gradient: 'from-emerald-950/40 via-slate-900 to-slate-950',
+      'The quiet gateway to the school’s knowledge sanctuary, marked by classic black-and-gold door signage that instills respect for scholarly silence and literary discovery.',
+    features: ['Distinctive black & gold institutional signage', 'Designated silent study zone', 'Daily catalog checkout desk'],
+    image: '/school-images/library-reading-room-entrance.jpg',
   },
   {
-    id: 'aquatics',
-    name: 'The Olympic Aquatics & Sports Complex',
-    subtitle: 'Heated 50m Pool, Turf Grounds & Squash Arenas',
+    id: 'reading-alcove',
+    name: 'Library Interior & Study Alcove',
+    subtitle: '"A Library is a Hospital for the Mind"',
     description:
-      'Designed to Olympic standards with electronic touch timing, temperature control, glass-back international squash courts, and pavilion seating for 2,000 spectators.',
-    features: ['50-meter 8-Lane Competition Pool', 'FIFA-grade All-Weather Pitch', 'Biomechanics Physiology Lab'],
-    gradient: 'from-cyan-950/40 via-slate-900 to-slate-950',
+      'A serene reading room featuring the celebrated wall inscription: "A LIBRARY IS A HOSPITAL FOR THE MIND." Fitted with individual wooden study carrels, curricular reference texts, and general knowledge volumes.',
+    features: ['Inspirational motto wall feature', 'Reference books for Classes 1–10', 'Quiet independent study alcoves'],
+    image: '/school-images/library-hospital-for-mind.jpg',
+  },
+  {
+    id: 'greenery',
+    name: 'Bulletin Board & Hallway Greenery',
+    subtitle: 'Academic Circulars & Botanical Hallway',
+    description:
+      'Lined with fresh potted botanical greenery and the official student circular board, displaying academic schedules, student achievements, and school announcements.',
+    features: ['Potted decorative palms & plants', 'Active student notices & timetables', 'Neat polished hallway finish'],
+    image: '/school-images/hallway-bulletin-greenery.jpg',
   },
 ];
 
 export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onClose }) => {
-  const [activeLocationId, setActiveLocationId] = useState<string>('quadrangle');
+  const [activeLocationId, setActiveLocationId] = useState<string>('corridor');
 
   if (!isOpen) return null;
 
@@ -68,7 +77,7 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-modal-title"
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
@@ -76,21 +85,21 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 8 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-[#0B1528] border border-blue-900/60 max-w-4xl w-full rounded-2xl shadow-2xl text-stone-100 overflow-hidden flex flex-col max-h-[90vh]"
+          className="bg-white border border-slate-200 max-w-4xl w-full rounded-2xl shadow-2xl text-slate-800 overflow-hidden flex flex-col max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-blue-950 bg-[#070E1C]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-[#FBF9F5]">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#1B365D]">
                 <Compass className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 block">
-                  360° Interactive Campus Discovery
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 block">
+                  Campus Walkthrough · Classes 1 to 10
                 </span>
-                <h3 id="tour-modal-title" className="text-lg font-serif font-bold text-stone-100">
-                  The Mount Uni Virtual Campus Experience
+                <h3 id="tour-modal-title" className="text-lg font-serif font-bold text-[#1B365D]">
+                  The Mount School Campus Facilities
                 </h3>
               </div>
             </div>
@@ -98,108 +107,107 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
               type="button"
               onClick={onClose}
               aria-label="Close virtual tour"
-              className="p-1.5 text-stone-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Location Selector Tabs */}
-          <div className="px-6 py-3 bg-[#0B1528] border-b border-blue-950 overflow-x-auto">
-            <div className="flex items-center gap-2">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Location Selector Tabs */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {TOUR_LOCATIONS.map((loc) => {
-                const isSelected = loc.id === activeLocationId;
+                const isActive = loc.id === activeLocationId;
                 return (
                   <button
                     key={loc.id}
+                    type="button"
                     onClick={() => setActiveLocationId(loc.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-stone-400 hover:text-white bg-[#070E1C] border border-blue-950'
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      isActive
+                        ? 'bg-[#1B365D] border-[#1B365D] text-white shadow-xs'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    {loc.name.split('The ')[1] || loc.name}
+                    <span className="block text-[11px] font-bold line-clamp-1">{loc.name.split('&')[0].trim()}</span>
+                    <span className={`block text-[10px] line-clamp-1 ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
+                      {loc.subtitle.split('·')[0].trim()}
+                    </span>
                   </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Interactive 360 Viewport */}
-          <div className="p-6 overflow-y-auto space-y-6">
-            <div className={`relative h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-blue-900/50 bg-gradient-to-br ${current.gradient} flex items-center justify-center p-6 text-center shadow-inner`}>
-              {/* Atmospheric Compass Grid */}
-              <div className="absolute inset-0 opacity-20 pointer-events-none">
-                <div className="w-full h-full bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]" />
-              </div>
-
-              <div className="relative z-10 max-w-lg">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600/20 text-blue-300 border border-blue-500/30 mb-3">
-                  <Eye className="w-3.5 h-3.5" /> 360° High-Definition Panorama
-                </span>
-                <h4 className="text-xl sm:text-2xl font-serif font-bold text-stone-100 mb-2">
+            {/* Showcase View */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              {/* Photo */}
+              <div className="md:col-span-7 rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-72 sm:h-80 relative bg-slate-100">
+                <img
+                  src={current.image}
+                  alt={current.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-md text-[11px] font-semibold text-[#1B365D] border border-slate-200 shadow-xs">
                   {current.name}
-                </h4>
-                <p className="text-xs text-stone-300 leading-relaxed font-light mb-4">
-                  {current.subtitle}
-                </p>
-                <div className="inline-flex items-center gap-2 text-[11px] text-amber-300 font-mono bg-stone-900/80 px-3 py-1 rounded-md border border-stone-800">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Main Campus · Quadrangle Coordinates: 31.5204° N, 74.3587° E</span>
                 </div>
               </div>
-            </div>
 
-            {/* Location Details & Highlights */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start text-xs">
-              <div className="md:col-span-7 space-y-2">
-                <h5 className="text-xs font-semibold uppercase tracking-wider text-amber-400 font-mono">
-                  About This Landmark
-                </h5>
-                <p className="text-stone-300 leading-relaxed">
+              {/* Text Description */}
+              <div className="md:col-span-5 space-y-4">
+                <div>
+                  <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block mb-1">
+                    Verified School Facility
+                  </span>
+                  <h4 className="font-serif text-xl font-bold text-[#1B365D] mb-1">
+                    {current.name}
+                  </h4>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {current.subtitle}
+                  </p>
+                </div>
+
+                <p className="text-xs text-slate-600 font-light leading-relaxed">
                   {current.description}
                 </p>
-              </div>
 
-              <div className="md:col-span-5 p-4 rounded-xl bg-[#070E1C] border border-blue-950 space-y-2">
-                <h5 className="text-[11px] font-semibold uppercase tracking-wider text-blue-400 font-mono">
-                  Campus Facilities
-                </h5>
-                <ul className="space-y-1.5">
-                  {current.features.map((feat, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-stone-300">
-                      <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-700 block">
+                    Facility Highlights
+                  </span>
+                  <ul className="space-y-1.5 text-xs">
+                    {current.features.map((feat, i) => (
+                      <li key={i} className="flex items-center gap-2 text-slate-700">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-[#070E1C] border-t border-blue-950 flex flex-wrap items-center justify-between gap-4 text-xs">
-            <span className="text-stone-400">
-              Want to visit in person? Our admissions ambassadors offer guided walking tours every Saturday.
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-stone-300 hover:text-white bg-slate-900 border border-slate-800"
-              >
-                Close Preview
-              </button>
-              <a
-                href="#book-tour"
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-colors shadow-md flex items-center gap-1.5"
-              >
-                Book Guided Campus Tour
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
+          <div className="px-6 py-4 border-t border-slate-100 bg-[#FBF9F5] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <a
+              href="https://yandex.com/maps/-/CXVyNN8q"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-600 hover:text-[#1B365D] flex items-center gap-1.5 font-medium"
+            >
+              <MapPin className="w-3.5 h-3.5 text-amber-600" />
+              <span>Campus Map: 32.834662° N, 72.999090° E</span>
+              <ExternalLink className="w-3 h-3 text-slate-400" />
+            </a>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#1B365D] hover:bg-[#132742] transition-colors"
+            >
+              Close Walkthrough
+            </button>
           </div>
         </motion.div>
       </div>

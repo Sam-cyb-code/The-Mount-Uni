@@ -3,10 +3,6 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import {
   Compass,
   MapPin,
-  Cpu,
-  Trophy,
-  Activity,
-  BookOpen,
   Sparkles,
   Maximize2,
   Calendar,
@@ -16,18 +12,23 @@ import {
   ArrowRight,
   Shield,
   Clock,
+  Camera,
+  BookOpen,
+  School,
+  ExternalLink,
 } from 'lucide-react';
+import { CampusParallaxGallery } from './CampusParallaxGallery';
 
 interface ThenNowSliderProps {
-  oldImageLabel?: string;
-  newImageLabel?: string;
+  firstLabel?: string;
+  secondLabel?: string;
 }
 
 export const ThenNowSlider: React.FC<ThenNowSliderProps> = ({
-  oldImageLabel = 'Founding Quadrangle (1984)',
-  newImageLabel = 'Autonomous Innovation Campus (2027)',
+  firstLabel = 'School Academic Corridors & Tactile Pathway',
+  secondLabel = 'Natural-Lit Classrooms & Study Desks',
 }) => {
-  const [sliderPosition, setSliderPosition] = useState(52); // Percentage 0 - 100
+  const [sliderPosition, setSliderPosition] = useState(50); // Percentage 0 - 100
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -78,7 +79,7 @@ export const ThenNowSlider: React.FC<ThenNowSliderProps> = ({
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-blue-900/60 shadow-2xl bg-[#070E1C] select-none">
+    <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-white select-none">
       <div
         ref={containerRef}
         onMouseDown={(e) => {
@@ -89,85 +90,79 @@ export const ThenNowSlider: React.FC<ThenNowSliderProps> = ({
           setIsDragging(true);
           handleMove(e.touches[0].clientX);
         }}
-        className="relative w-full h-[420px] sm:h-[480px] cursor-ew-resize overflow-hidden"
+        className="relative w-full h-[380px] sm:h-[460px] cursor-ew-resize overflow-hidden"
       >
-        {/* Right / Modern Image Layer (Base) */}
-        <div className="absolute inset-0 w-full h-full bg-[#09152C] flex items-center justify-center overflow-hidden">
-          {/* Stylized Modern Campus Architectural Visual */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#050C1A] via-[#0D2040] to-[#152E5E] opacity-90" />
+        {/* Right / Classroom Image Layer (Base) */}
+        <div className="absolute inset-0 w-full h-full bg-slate-100 flex items-center justify-center overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80"
-            alt="Modern Mount Uni Campus 2027"
-            className="w-full h-full object-cover mix-blend-luminosity opacity-40 filter contrast-125 scale-105"
+            src="/school-images/classroom-daylight-desks.jpg"
+            alt="School Classroom Environment"
+            className="w-full h-full object-cover"
           />
-          {/* Modern Blueprint & Lighting Overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#3B82F6_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
-          
-          {/* Modern Campus Labels */}
-          <div className="absolute bottom-6 right-6 text-right z-10 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-blue-500/30">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 block">
-              Present & Future
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent pointer-events-none" />
+
+          {/* Right Labels */}
+          <div className="absolute bottom-5 right-5 text-right z-10 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-200 shadow-lg">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 block">
+              Learning Space
             </span>
-            <span className="font-serif text-sm sm:text-base font-bold text-stone-100">
-              {newImageLabel}
+            <span className="font-serif text-sm font-bold text-[#1B365D]">
+              {secondLabel}
             </span>
-            <p className="text-[11px] text-stone-300 mt-0.5">
-              14 Smart Research Towers · 400 Gbps Quantum Core
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Spacious seating & clean natural daylight
             </p>
           </div>
         </div>
 
-        {/* Left / Old Campus Layer (Clipped based on slider position) */}
+        {/* Left / Corridor Layer (Clipped based on slider position) */}
         <div
-          className="absolute inset-y-0 left-0 overflow-hidden bg-[#1A1815] transition-none"
+          className="absolute inset-y-0 left-0 overflow-hidden bg-slate-200 transition-none"
           style={{ width: `${sliderPosition}%` }}
         >
           <div className="absolute inset-0 w-[100vw] max-w-[1280px] h-full flex items-center justify-center overflow-hidden">
-            {/* Vintage Sepia & Historic Stone Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#201811] via-[#33251A] to-[#1C1611] opacity-95" />
             <img
-              src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=80"
-              alt="Historic Foundation Quadrangle 1984"
-              className="w-full h-full object-cover filter sepia contrast-125 brightness-90 opacity-60"
+              src="/school-images/campus-corridor-colonnade.jpg"
+              alt="School Red Brick Corridors"
+              className="w-full h-full object-cover"
             />
-            {/* Vintage Film Grain effect */}
-            <div className="absolute inset-0 bg-stone-900/30 backdrop-contrast-125" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent pointer-events-none" />
           </div>
 
-          {/* Old Campus Labels */}
-          <div className="absolute bottom-6 left-6 text-left z-10 bg-stone-950/70 backdrop-blur-md px-4 py-2.5 rounded-xl border border-amber-900/40">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-500 block">
-              Historic Charter
+          {/* Left Labels */}
+          <div className="absolute bottom-5 left-5 text-left z-10 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-200 shadow-lg">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 block">
+              Campus Architecture
             </span>
-            <span className="font-serif text-sm sm:text-base font-bold text-stone-200">
-              {oldImageLabel}
+            <span className="font-serif text-sm font-bold text-[#1B365D]">
+              {firstLabel}
             </span>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              The First Stone Cloister · 128 Inaugural Scholars
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Classic red brick columns & textured walkway
             </p>
           </div>
         </div>
 
         {/* Draggable Divider Handle */}
         <div
-          className="absolute inset-y-0 w-1 bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.8)] z-20 pointer-events-none flex items-center justify-center"
+          className="absolute inset-y-0 w-1 bg-amber-500 shadow-lg z-20 pointer-events-none flex items-center justify-center"
           style={{ left: `${sliderPosition}%` }}
         >
-          <div className="w-9 h-9 rounded-full bg-stone-950 border-2 border-amber-400 shadow-xl flex items-center justify-center text-amber-400 text-xs font-mono font-bold">
-            <span className="text-xs">⟷</span>
+          <div className="w-8 h-8 rounded-full bg-white border-2 border-amber-500 shadow-lg flex items-center justify-center text-amber-700 text-xs font-bold">
+            <span>⟷</span>
           </div>
         </div>
       </div>
 
-      {/* Slider Bottom Caption & Interactive Hint */}
-      <div className="p-4 bg-[#0B1528] border-t border-blue-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
+      {/* Slider Bottom Caption */}
+      <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-amber-400 shrink-0" />
+          <Sliders className="w-4 h-4 text-amber-600 shrink-0" />
           <span>
-            Drag the handle horizontally to compare the 1984 collegiate heritage with our 2027 smart campus expansion.
+            Drag the handle horizontally to view the school corridors alongside our student classroom setting.
           </span>
         </div>
-        <div className="font-mono text-amber-400/90 text-[11px] font-semibold shrink-0">
+        <div className="font-mono text-slate-700 text-[11px] font-semibold shrink-0">
           Split Position: {Math.round(sliderPosition)}%
         </div>
       </div>
@@ -175,10 +170,13 @@ export const ThenNowSlider: React.FC<ThenNowSliderProps> = ({
   );
 };
 
-export const CampusLife: React.FC<{ onOpenVirtualTour?: () => void }> = ({
+export const CampusLife: React.FC<{
+  onOpenVirtualTour?: () => void;
+  onOpenMonograph?: () => void;
+}> = ({
   onOpenVirtualTour,
+  onOpenMonograph,
 }) => {
-  // Task 2: Interactive Parallax Campus Map using useScroll and useTransform
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const { scrollYProgress } = useScroll({
@@ -186,47 +184,42 @@ export const CampusLife: React.FC<{ onOpenVirtualTour?: () => void }> = ({
     offset: ['start end', 'end start'],
   });
 
-  // Background facility images translate slower (slower delta: -60px to 60px)
-  const bgFacilityTranslateY1 = useTransform(scrollYProgress, [0, 1], [-50, 70]);
-  const bgFacilityTranslateY2 = useTransform(scrollYProgress, [0, 1], [-80, 50]);
+  const bgFacilityTranslateY1 = useTransform(scrollYProgress, [0, 1], [-30, 40]);
+  const bgFacilityTranslateY2 = useTransform(scrollYProgress, [0, 1], [-50, 30]);
 
-  // Overlaying text descriptions translate faster (faster delta: 40px to -80px)
-  const textTranslateY1 = useTransform(scrollYProgress, [0, 1], [40, -60]);
-  const textTranslateY2 = useTransform(scrollYProgress, [0, 1], [60, -70]);
+  const textTranslateY1 = useTransform(scrollYProgress, [0, 1], [20, -30]);
+  const textTranslateY2 = useTransform(scrollYProgress, [0, 1], [30, -35]);
 
   const facilities = [
     {
-      id: 'robotics-ai-lab',
-      name: 'Alan Turing Robotics & Cognitive Systems Complex',
-      category: 'STEM Innovation',
-      specs: '18 Autonomous Robot Arenas · 4 Laser Cutters · Nvidia Supercomputer Node',
+      id: 'library-reading-room',
+      name: 'Library & B2 Reading Room',
+      category: 'Quiet Study & Knowledge Center',
+      specs: 'Reference collection · Study alcoves · Dedicated reading room',
+      quote: '"A Library is a Hospital for the Mind."',
       description:
-        'Equipped with advanced humanoid kinematics, drone flight testing cages, high-frequency oscilloscope benches, and dedicated AI model training clusters.',
-      lead: 'Prof. Dr. Tariq Mansoor, Lab Regent',
-      image:
-        'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+        'A dedicated quiet learning sanctuary equipped with school reference textbooks, general knowledge volumes, and quiet individual reading desks to foster focused study habits.',
+      image: '/school-images/library-hospital-for-mind.jpg',
     },
     {
-      id: 'sports-complex',
-      name: 'Olympian Sports Pavilions & Aquatic Center',
-      category: 'Athletics & Physical Well-being',
-      specs: '50m Heated Olympic Pool · 8 Squash Courts · All-Weather Cricket Oval',
+      id: 'bright-classrooms',
+      name: 'Classrooms for Classes 1 to 10',
+      category: 'Primary & Secondary Learning Environment',
+      specs: 'Spacious wooden bench-desks · Natural ventilation · Teacher presentation boards',
+      quote: 'Structured and engaging environment for young minds.',
       description:
-        'Managed by certified international coaches and resident sports physiotherapists, supporting 14 competitive inter-university varsity squads.',
-      lead: 'Director of Athletics, Major (R) H. Daniyal',
-      image:
-        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80',
+        'Well-lit, ventilated classrooms configured with durable student bench-desks to encourage active collaboration, neat presentation, and daily academic engagement under attentive teacher supervision.',
+      image: '/school-images/classroom-daylight-desks.jpg',
     },
     {
-      id: 'bodleian-library',
-      name: 'Chancellors Memorial Library & Rare Manuscripts Vault',
-      category: 'Scholarly Archiving',
-      specs: '280,000 Bound Volumes · JSTOR & Elsevier Terminal Hubs · 40 Silent Alcoves',
+      id: 'campus-corridors',
+      name: 'Central Academic Corridors & Greenery',
+      category: 'School Ground & Campus Flow',
+      specs: 'Sheltered walkways · Brick pillared arcades · Activity bulletin board',
+      quote: 'Safe, orderly movement throughout school hours.',
       description:
-        'A sanctuary of silence and deep concentration with temperature-controlled archives housing 18th-century charters and rare cartographic maps.',
-      lead: 'Chief Archivist, Lady Eleanor Vance',
-      image:
-        'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80',
+        'Covered corridors lined with red brick pillars and tactile walkways facilitate smooth and safe student movement between classes, morning assembly, and school activity rooms.',
+      image: '/school-images/campus-corridor-colonnade.jpg',
     },
   ];
 
@@ -234,156 +227,189 @@ export const CampusLife: React.FC<{ onOpenVirtualTour?: () => void }> = ({
     <section
       ref={sectionRef}
       id="campus-life"
-      className="py-24 bg-[#070E1C] text-stone-100 border-b border-blue-950 relative overflow-hidden"
+      className="py-20 sm:py-24 bg-white text-slate-800 border-b border-slate-200 relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 pb-6 border-b border-blue-950/80 gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 pb-6 border-b border-slate-200 gap-6">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400 block mb-2">
-              Campus Topography & Student Life
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-stone-100">
-              The Physical World of The Mount Uni
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#1B365D] uppercase tracking-wider mb-2">
+              <span>Campus Facilities</span>
+              <span>·</span>
+              <span>Classes 1 to 10</span>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1B365D]">
+              Our School Campus & Learning Spaces
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-stone-300 font-light max-w-2xl leading-relaxed">
-              120 verdant acres combining Gothic limestone cloisters with modern glass atrium laboratories. Experience our evolving infrastructure.
+            <p className="mt-3 text-sm sm:text-base text-slate-600 font-light max-w-2xl leading-relaxed">
+              Explore the genuine grounds of our school. From welcoming red brick corridors to the peaceful B2 reading room and airy classrooms, our environment is built for student safety, focus, and character.
             </p>
           </div>
 
-          {onOpenVirtualTour && (
-            <button
-              type="button"
-              onClick={onOpenVirtualTour}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 transition-all shadow-lg shadow-amber-500/20 shrink-0"
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="https://yandex.com/maps/-/CXVyNN8q"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
             >
-              <Compass className="w-4 h-4 text-stone-950" />
-              Launch 360° Virtual Tour
-            </button>
-          )}
+              <MapPin className="w-4 h-4 text-amber-600" />
+              <span>View On Map</span>
+              <ExternalLink className="w-3 h-3 text-slate-400" />
+            </a>
+
+            {onOpenMonograph && (
+              <button
+                type="button"
+                onClick={onOpenMonograph}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B365D] hover:bg-[#132742] transition-all shadow-sm"
+              >
+                <Camera className="w-4 h-4 text-amber-400" />
+                <span>School Gallery (#001–#005)</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Task 3: Then vs. Now Interactive Slider */}
-        <div className="mb-24">
-          <div className="flex items-center justify-between mb-6">
+        {/* Interactive Comparison Slider */}
+        <div className="mb-20">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <span className="text-xs font-mono uppercase tracking-wider text-amber-400 block mb-1">
-                Campus Evolution Chronology
+              <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider block mb-1">
+                Interactive Campus View
               </span>
-              <h3 className="font-serif text-2xl font-bold text-stone-100">
-                Then vs. Now: Draggable Heritage Comparison
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1B365D]">
+                Corridors and Classroom Environment
               </h3>
             </div>
-            <span className="hidden sm:inline-block text-xs text-stone-400">
-              Interactive split comparison
+            <span className="hidden sm:inline-block text-xs text-slate-500">
+              Drag slider to compare spaces
             </span>
           </div>
 
           <ThenNowSlider />
         </div>
 
-        {/* Task 2: Interactive Parallax Campus Map Section */}
-        <div className="mt-16">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400 block mb-1">
-              Parallax Spatial Exploration
-            </span>
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-stone-100 mb-2">
-              Precision Facilities & Research Spaces
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-400 font-light leading-relaxed">
-              As you scroll down the campus grounds, observe how our physical laboratories, athletic halls, and research libraries reveal themselves through dynamic perspective shifts.
-            </p>
+        {/* Parallax Facility Sections */}
+        <div className="space-y-20">
+          {/* Facility 1: Library & Reading Room */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <motion.div
+              style={{ y: bgFacilityTranslateY1 }}
+              className="lg:col-span-7 relative rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-100 h-80 sm:h-96 group"
+            >
+              <img
+                src={facilities[0].image}
+                alt={facilities[0].name}
+                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-semibold text-[#1B365D]">
+                  B2 Reading Room
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              style={{ y: textTranslateY1 }}
+              className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm"
+            >
+              <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block mb-1.5">
+                {facilities[0].category}
+              </span>
+              <h4 className="font-serif text-2xl font-bold text-[#1B365D] mb-3">
+                {facilities[0].name}
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
+                {facilities[0].description}
+              </p>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 mb-4 text-xs font-medium text-slate-700">
+                {facilities[0].specs}
+              </div>
+              <blockquote className="text-xs font-serif italic text-amber-800 border-l-2 border-amber-500 pl-3">
+                {facilities[0].quote}
+              </blockquote>
+            </motion.div>
           </div>
 
-          <div className="space-y-24">
-            {/* Facility 1: Robotics Lab */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Background facility image moving slower */}
-              <motion.div
-                style={{ y: bgFacilityTranslateY1 }}
-                className="lg:col-span-7 relative rounded-2xl overflow-hidden border border-blue-900/60 shadow-2xl bg-slate-900 h-80 sm:h-96 group"
-              >
-                <img
-                  src={facilities[0].image}
-                  alt={facilities[0].name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070E1C] via-transparent to-transparent opacity-80" />
-                <div className="absolute top-4 left-4 bg-[#070E1C]/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/30 flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-mono font-semibold text-stone-200">
-                    Robotics & Embedded Systems
-                  </span>
-                </div>
-              </motion.div>
+          {/* Facility 2: Classrooms (Reversed layout) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <motion.div
+              style={{ y: textTranslateY2 }}
+              className="lg:col-span-5 order-2 lg:order-1 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm"
+            >
+              <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block mb-1.5">
+                {facilities[1].category}
+              </span>
+              <h4 className="font-serif text-2xl font-bold text-[#1B365D] mb-3">
+                {facilities[1].name}
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
+                {facilities[1].description}
+              </p>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 mb-4 text-xs font-medium text-slate-700">
+                {facilities[1].specs}
+              </div>
+              <blockquote className="text-xs font-serif italic text-amber-800 border-l-2 border-amber-500 pl-3">
+                {facilities[1].quote}
+              </blockquote>
+            </motion.div>
 
-              {/* Overlaying text description moving faster */}
-              <motion.div
-                style={{ y: textTranslateY1 }}
-                className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-[#0B1528] border border-blue-950 shadow-xl"
-              >
-                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block mb-2">
-                  {facilities[0].category}
+            <motion.div
+              style={{ y: bgFacilityTranslateY2 }}
+              className="lg:col-span-7 order-1 lg:order-2 relative rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-100 h-80 sm:h-96 group"
+            >
+              <img
+                src={facilities[1].image}
+                alt={facilities[1].name}
+                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+                <School className="w-4 h-4 text-blue-600" />
+                <span className="text-xs font-semibold text-[#1B365D]">
+                  Classrooms 1–10
                 </span>
-                <h4 className="font-serif text-2xl font-bold text-stone-100 mb-3">
-                  {facilities[0].name}
-                </h4>
-                <p className="text-xs text-stone-300 font-light leading-relaxed mb-4">
-                  {facilities[0].description}
-                </p>
-                <div className="p-3 rounded-xl bg-[#070E1C] border border-blue-950 mb-4 text-xs font-mono text-stone-300">
-                  {facilities[0].specs}
-                </div>
-                <span className="text-[11px] text-amber-300 font-serif italic block">
-                  {facilities[0].lead}
-                </span>
-              </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* ARCHITECTURAL MONOGRAPH & SCROLL-LINKED PARALLAX GALLERY (#001 - #005)    */}
+        {/* ========================================================================= */}
+        <div id="monograph-gallery" className="mt-24 pt-16 border-t border-slate-200">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-[#1B365D] text-xs font-semibold uppercase tracking-wider mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>School Photographic Monograph (#001 to #005)</span>
+              </div>
+              <h3 className="font-serif text-3xl sm:text-4xl font-bold text-[#1B365D] tracking-tight">
+                Authentic School Reference Photographs
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 font-light max-w-2xl leading-relaxed">
+                Scroll through our five verified school locations. The serial indicators (<span className="text-amber-700 font-mono font-bold">#001</span> to <span className="text-amber-700 font-mono font-bold">#005</span>) animate dynamically with vertical page scroll, reflecting the genuine corridors, library, and classrooms of our school.
+              </p>
             </div>
 
-            {/* Facility 2: Sports Complex (Reversed layout) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Overlaying text description moving faster */}
-              <motion.div
-                style={{ y: textTranslateY2 }}
-                className="lg:col-span-5 order-2 lg:order-1 p-6 sm:p-8 rounded-2xl bg-[#0B1528] border border-blue-950 shadow-xl"
+            {onOpenMonograph && (
+              <button
+                type="button"
+                onClick={onOpenMonograph}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B365D] hover:bg-[#132742] transition-all shadow-sm shrink-0 cursor-pointer"
               >
-                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block mb-2">
-                  {facilities[1].category}
-                </span>
-                <h4 className="font-serif text-2xl font-bold text-stone-100 mb-3">
-                  {facilities[1].name}
-                </h4>
-                <p className="text-xs text-stone-300 font-light leading-relaxed mb-4">
-                  {facilities[1].description}
-                </p>
-                <div className="p-3 rounded-xl bg-[#070E1C] border border-blue-950 mb-4 text-xs font-mono text-stone-300">
-                  {facilities[1].specs}
-                </div>
-                <span className="text-[11px] text-amber-300 font-serif italic block">
-                  {facilities[1].lead}
-                </span>
-              </motion.div>
+                <Camera className="w-4 h-4 text-amber-400" />
+                <span>Fullscreen Gallery</span>
+              </button>
+            )}
+          </div>
 
-              {/* Background facility image moving slower */}
-              <motion.div
-                style={{ y: bgFacilityTranslateY2 }}
-                className="lg:col-span-7 order-1 lg:order-2 relative rounded-2xl overflow-hidden border border-blue-900/60 shadow-2xl bg-slate-900 h-80 sm:h-96 group"
-              >
-                <img
-                  src={facilities[1].image}
-                  alt={facilities[1].name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070E1C] via-transparent to-transparent opacity-80" />
-                <div className="absolute top-4 left-4 bg-[#070E1C]/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/30 flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-mono font-semibold text-stone-200">
-                    Aquatic & Varsity Sports
-                  </span>
-                </div>
-              </motion.div>
-            </div>
+          {/* Embedded Parallax Gallery View */}
+          <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-md bg-slate-50">
+            <CampusParallaxGallery mode="embedded" />
           </div>
         </div>
       </div>

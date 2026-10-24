@@ -25,14 +25,14 @@ test('getPortalById returns the correct portal or undefined', () => {
   assert.equal(invalid, undefined);
 });
 
-test('searchNavigation returns matching academic levels and links for Cambridge and Matric', () => {
-  const cambridgeResults = searchNavigation('Cambridge', NAV_TABS, ACADEMIC_LEVELS);
-  assert.ok(cambridgeResults.length > 0);
-  assert.ok(cambridgeResults.some((r) => r.title.includes('Cambridge') || r.category.includes('Cambridge')));
+test('searchNavigation returns matching academic levels and links for Primary and Secondary', () => {
+  const primaryResults = searchNavigation('Primary', NAV_TABS, ACADEMIC_LEVELS);
+  assert.ok(primaryResults.length > 0);
+  assert.ok(primaryResults.some((r) => r.title.includes('Primary') || r.category.includes('Primary')));
 
-  const matricResults = searchNavigation('Matric', NAV_TABS, ACADEMIC_LEVELS);
-  assert.ok(matricResults.length > 0);
-  assert.ok(matricResults.some((r) => r.title.includes('Matric') || r.description?.includes('Matric') || r.category.includes('Senior School')));
+  const secondaryResults = searchNavigation('Secondary', NAV_TABS, ACADEMIC_LEVELS);
+  assert.ok(secondaryResults.length > 0);
+  assert.ok(secondaryResults.some((r) => r.title.includes('Secondary') || r.description?.includes('Secondary') || r.category.includes('Secondary')));
 });
 
 test('resolveActiveTabFromHash identifies valid tabs', () => {

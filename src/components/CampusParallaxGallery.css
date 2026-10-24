@@ -1,0 +1,165 @@
+/* CampusParallaxGallery.css
+   Architectural Monograph & Scroll-Linked Parallax Gallery
+   Faithfully implementing the user's Motion scroll parallax specifications
+   with clean collegiate typography, bright elegant styling, and responsive layout.
+*/
+
+:root {
+  --monograph-accent: #b45309; /* Warm Gold / Amber Accent */
+  --monograph-accent-glow: rgba(180, 83, 9, 0.25);
+  --monograph-bg: #f8fafc;
+  --monograph-surface: #ffffff;
+  --monograph-text: #0f172a;
+  --monograph-muted: #64748b;
+}
+
+/* Snap container styling when snap mode is enabled */
+.gallery-snap-root {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  position: relative;
+  background-color: #f1f5f9;
+}
+
+/* Embedded page section styling when placed inside campus-life */
+.gallery-embedded-root {
+  position: relative;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+/* Base img-container matching user's spec */
+.img-container {
+  min-height: 100vh;
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 2rem 1rem;
+  overflow: hidden;
+}
+
+/* Inner card container */
+.img-container > .card-wrapper {
+  position: relative;
+  width: 320px;
+  height: 460px;
+  margin: 20px;
+  background: var(--monograph-surface);
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.15),
+              0 0 1px 1px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+@media (min-width: 640px) {
+  .img-container > .card-wrapper {
+    width: 380px;
+    height: 500px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .img-container > .card-wrapper {
+    width: 440px;
+    height: 560px;
+  }
+}
+
+.img-container > .card-wrapper:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.2);
+}
+
+/* Photographic Canvas within the Card */
+.img-container .img-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.img-container > .card-wrapper:hover .img-media {
+  transform: scale(1.03);
+}
+
+/* User's Signature Parallax Header (h2: #001 ... #005) */
+.img-container h2.serial-number {
+  color: var(--monograph-accent);
+  margin: 0;
+  font-family: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 54px;
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1;
+  position: absolute;
+  display: inline-block;
+  top: calc(50% - 32px);
+  left: calc(50% + 90px);
+  z-index: 30;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9),
+               0 1px 3px rgba(0, 0, 0, 0.3);
+  mix-blend-mode: normal;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .img-container h2.serial-number {
+    font-size: 68px;
+    letter-spacing: -4px;
+    left: calc(50% + 120px);
+    top: calc(50% - 38px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .img-container h2.serial-number {
+    font-size: 86px;
+    letter-spacing: -5px;
+    left: calc(50% + 150px);
+    top: calc(50% - 46px);
+  }
+}
+
+/* Floating Monograph Progress Bar */
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #b45309 50%, #f59e0b 100%);
+  bottom: 45px;
+  z-index: 50;
+  transform-origin: 0% 50%;
+  box-shadow: 0 0 10px rgba(180, 83, 9, 0.4);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+/* Monograph Ambient Watermark */
+.monograph-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: serif;
+  font-size: clamp(6rem, 18vw, 22rem);
+  font-weight: 900;
+  color: rgba(15, 23, 42, 0.03);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}

@@ -1,6 +1,6 @@
 {
   "name": "The Mount Uni - Premier Institution",
-  "description": "Official layout shell, emergency alert ticker, sticky responsive mega-menu, and student portals for The Mount Uni.",
+  "description": "Official website, emergency alert ticker, responsive navigation, and School Management System for The Mont Uni Pre Cadet Academy (Classes 1–10) in Chakwal, Punjab, Pakistan.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

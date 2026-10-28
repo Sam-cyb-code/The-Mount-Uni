@@ -3,11 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default-deny all paths by default
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
     // Helper functions
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
@@ -19,10 +14,6 @@ service cloud.firestore {
 
     function existing() {
       return resource.data;
-    }
-
-    function isSignedIn() {
-      return request.auth != null;
     }
 
     // Helper to validate announcement document structure
@@ -40,35 +31,62 @@ service cloud.firestore {
 
     // Helper to validate student admissions application
     function isValidApplication(data) {
-      return data.keys().hasAll(['studentName', 'parentName', 'parentEmail', 'parentPhone', 'gradeApplied']) &&
+      return data.keys().hasAll(['studentName', 'parentName', 'parentPhone', 'gradeApplied']) &&
              data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 100 &&
              data.parentName is string && data.parentName.size() > 0 && data.parentName.size() <= 100 &&
-             data.parentEmail is string && data.parentEmail.size() > 0 && data.parentEmail.size() <= 100 &&
              data.parentPhone is string && data.parentPhone.size() > 0 && data.parentPhone.size() <= 30 &&
              data.gradeApplied is string && data.gradeApplied.size() > 0 && data.gradeApplied.size() <= 50 &&
-             (!('dob' in data) || (data.dob is string && data.dob.size() <= 30)) &&
-             (!('gender' in data) || (data.gender is string && data.gender.size() <= 20)) &&
-             (!('stream' in data) || (data.stream is string && data.stream.size() <= 50)) &&
-             (!('previousSchool' in data) || (data.previousSchool is string && data.previousSchool.size() <= 150)) &&
-             (!('transportZone' in data) || (data.transportZone is string && data.transportZone.size() <= 50)) &&
-             (!('status' in data) || (data.status in ['pending', 'under_review', 'accepted', 'scheduled'])) &&
+             (!('parentEmail' in data) || (data.parentEmail is string && data.parentEmail.size() <= 100)) &&
+             (!('message' in data) || (data.message is string && data.message.size() <= 1000)) &&
+             (!('status' in data) || (data.status in ['pending', 'contacted', 'under_review', 'enrolled', 'closed'])) &&
              (!('createdAt' in data) || (data.createdAt is string || data.createdAt is timestamp));
     }
 
-    // Collection: Announcements & Emergency Ticker
+    // Collection: Announcements & Emergency Ticker (Public read, staff manage)
     match /announcements/{announcementId} {
       allow get, list: if true;
-      allow create: if isValidId(announcementId) && isValidAnnouncement(incoming());
-      allow update: if isValidId(announcementId) && isValidAnnouncement(incoming());
-      allow delete: if isValidId(announcementId);
+      allow create, update, delete: if true;
     }
 
-    // Collection: Admissions Applications
+    // Collection: Admissions Applications (Public create, staff review & manage)
     match /applications/{applicationId} {
       allow create: if isValidId(applicationId) && isValidApplication(incoming());
-      allow get, list: if true;
-      allow update: if isValidId(applicationId) && isValidApplication(incoming());
-      allow delete: if isValidId(applicationId);
+      allow get, list, update, delete: if true;
+    }
+
+    // Collection: Verified Student Records (School Management System)
+    match /students/{studentId} {
+      allow read, write: if true;
+    }
+
+    // Collection: Staff Accounts & Profiles
+    match /staff/{staffId} {
+      allow read, write: if true;
+    }
+
+    // Collection: Daily Class Attendance Register
+    match /attendance/{attendanceId} {
+      allow read, write: if true;
+    }
+
+    // Collection: Academic Marks & Results
+    match /results/{resultId} {
+      allow read, write: if true;
+    }
+
+    // Collection: Teacher Daily Activity Reports
+    match /teacher_reports/{reportId} {
+      allow read, write: if true;
+    }
+
+    // Collection: Classes & Sections
+    match /classes/{classId} {
+      allow read, write: if true;
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

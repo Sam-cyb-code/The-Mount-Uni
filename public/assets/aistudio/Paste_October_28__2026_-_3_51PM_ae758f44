@@ -1,0 +1,714 @@
+# MASTER DEVELOPMENT PROMPT — THE MONT UNI PRE CADET ACADEMY
+## Complete Professional Website Redesign, Pakistani School Branding & School Management System
+
+Act as a senior full-stack developer, UI/UX designer, branding specialist, accessibility engineer, and school management software architect.
+
+Your task is to professionally redesign and improve my EXISTING website project for:
+
+**Official School Name:** The Mont Uni Pre Cadet Academy  
+**Location:** Chakwal area, Punjab, Pakistan  
+**Existing website references:**
+- https://the-mount-uni.ai.studio/
+- https://the-mount-uni-premier-institution.ai.studio/
+
+The website already exists. Work inside the existing project and inspect its source code, components, dependencies, configuration, assets, backend integrations, and deployment setup before making changes.
+
+The current design is too dark, futuristic, complicated, and visually excessive. I want a complete transformation into a premium, modern, welcoming, authentic Pakistani school website.
+
+This is a school website, NOT a futuristic technology dashboard, cyber-security platform, or AI startup landing page.
+
+---
+
+# 1. CRITICAL DEVELOPMENT RULES
+
+Follow these requirements throughout the project:
+
+1. Inspect the existing source code and project structure before editing.
+2. Preserve existing working functionality unless a change is necessary and approved.
+3. Do not unnecessarily delete, replace, or rebuild working components.
+4. Do not redesign unrelated features or remove existing integrations without justification.
+5. Keep the official school identity, actual logos, school name, verified information, and useful existing content.
+6. Do not invent school facilities, qualifications, examination boards, academic results, awards, establishment dates, staff details, contact information, or achievements.
+7. Do not invent backend functionality or present sample dashboard data as real school records.
+8. Do not expose API keys, database credentials, service-role keys, or other secrets in browser code.
+9. Use the existing technology stack where it is suitable. Recommend a migration only when there is a clear technical reason.
+10. Do not stop after producing a design description. Implement the approved changes in the existing project, subject to the preview-and-approval requirement below.
+11. Before major architectural changes, explain what needs to change and why.
+12. Do not overwrite or delete important existing project files without understanding their purpose.
+
+## Required approval workflow
+
+Before completing the entire redesign, produce a reviewable first-stage implementation containing:
+
+- Redesigned desktop homepage.
+- Redesigned mobile homepage.
+- Academic section for Classes 1–10.
+- AI & Digital Learning section.
+- School Management System dashboard preview.
+- A list of completed, partially functional, and pending features.
+
+Keep the project in a reviewable state. Do not claim final approval has been granted. Once the design direction is approved, continue with the remaining implementation.
+
+---
+
+# 2. DESIGN DIRECTION AND BRAND IDENTITY
+
+Create a premium Pakistani private-school visual identity that feels professional, trustworthy, disciplined, welcoming, and educational.
+
+The design should appeal primarily to parents and guardians in Chakwal, Kot Raja, and surrounding communities.
+
+## Visual characteristics
+
+- Clean white and off-white backgrounds.
+- Elegant forest-green primary branding.
+- Refined academic-blue secondary branding.
+- Restrained muted-gold accents.
+- High-quality, authentic school photography.
+- Excellent typography and readability.
+- Balanced spacing and consistent alignment.
+- Attractive academic cards and clean section layouts.
+- Subtle hover effects and restrained animations.
+- Smooth but lightweight transitions.
+- Responsive navigation and clear admissions calls to action.
+
+## Initial colour palette
+
+Use the following proposed palette as the starting point:
+
+- Primary forest green: #0F5132
+- Secondary academic blue: #1E40AF
+- Accent gold: #D4AF37
+- Main background: #F8FAF7
+- White: #FFFFFF
+- Main text: #1F2937
+- Secondary text: #64748B
+- Light green section: #EAF2EB
+- Light blue section: #EDF3FA
+- Borders: #E2E8F0
+
+Inspect the official school logos and align the final colours with the real brand assets. Do not force colours that conflict with the official branding.
+
+Use green for primary actions, blue for supporting academic elements, and gold sparingly for small highlights.
+
+## Strictly avoid
+
+- Neon green or glowing borders.
+- Excessive dark backgrounds.
+- Futuristic AI dashboard styling.
+- Excessive glassmorphism.
+- Oversized 3D icons.
+- Unnecessary floating particles.
+- Animated backgrounds that distract from content.
+- Excessive gradients.
+- Giant headings that occupy most of the screen.
+- Complicated navigation.
+- Repetitive sections.
+- Excessive scroll-triggered animations.
+- Artificially luxurious campus imagery that misrepresents the actual school.
+
+The finished website should look like a premium, professionally designed school website, not a generic AI-generated template.
+
+---
+
+# 3. OFFICIAL LOGOS AND SCHOOL PHOTOGRAPHY
+
+## Official branding assets
+
+Inspect the assets already uploaded to the project.
+
+Use the official school logos previously supplied, including the appropriate primary school logo and supporting academy emblem.
+
+Requirements:
+
+- Preserve the original logo artwork and proportions.
+- Do not recreate the logo using generated text.
+- Do not distort, recolour, or crop the logos incorrectly.
+- Use suitable transparent or high-quality logo files where available.
+- Maintain consistent branding across the public website and school portal.
+
+If a required logo asset cannot be found, clearly identify the missing asset rather than inventing a replacement.
+
+## Pakistani school photography
+
+Use authentic-looking, locally appropriate photographs that reflect the school environment and the Chakwal/Kot Raja region of Punjab.
+
+Prioritise:
+
+1. The actual school building and entrance.
+2. Pakistani students in the school's real uniform.
+3. Real classrooms and teaching activities.
+4. The school grounds and surrounding environment.
+5. Genuine Pre-Cadet activities, discipline, teamwork, and student participation.
+6. Teachers interacting with students.
+7. Age-appropriate educational activities.
+
+If genuine school photographs are available in the project, use them first.
+
+If suitable images are unavailable, select appropriate stock photographs from sources such as Unsplash, Pexels, or Pixabay. Verify the licence and permitted use of each selected image.
+
+Do not claim that a stock photograph depicts The Mont Uni itself. Do not misrepresent another school's building, uniform, facilities, or students as belonging to this academy.
+
+Use image assets that load reliably on other devices. Prefer properly stored and optimised project assets over temporary local paths or inaccessible AI Studio upload references.
+
+Do not embed enormous base64 images into components unless there is a clear technical reason.
+
+For all important images:
+
+- Add meaningful alternative text.
+- Use responsive image sizes.
+- Preserve the correct aspect ratio.
+- Apply appropriate object-fit settings.
+- Optimise file sizes.
+- Prevent layout shifts.
+- Provide a fallback when an image fails to load.
+
+Do not hotlink to temporary image URLs that may stop working.
+
+---
+
+# 4. WEBSITE STRUCTURE
+
+Create a concise homepage with approximately eight main sections. Detailed information can live on separate pages instead of extending the homepage unnecessarily.
+
+## SECTION 1 — HEADER AND NAVIGATION
+
+Create a clean, responsive header featuring:
+
+- Official school logo.
+- The Mont Uni Pre Cadet Academy name.
+- Home.
+- About Us.
+- Academics.
+- AI & Digital Learning.
+- Admissions.
+- Contact.
+- A prominent “Enquire About Admissions” button.
+
+Requirements:
+
+- Desktop navigation should be simple and balanced.
+- Mobile navigation must open and close reliably.
+- All links must navigate to real sections or existing pages.
+- Provide clear focus indicators and accessible controls.
+- Avoid excessively tall headers.
+- Keep the logo readable on mobile.
+- Do not use a complex mega-menu.
+
+The header may become compact on scroll if this improves usability without causing layout problems.
+
+## SECTION 2 — HERO SECTION
+
+Create an attractive hero section with a strong school photograph and clear messaging.
+
+Use this headline:
+
+“Building Knowledge. Shaping Character. Preparing for the Future.”
+
+Use this supporting text:
+
+“Welcome to The Mont Uni Pre Cadet Academy, where academic learning, confidence, discipline and character development support students as they prepare for the future.”
+
+Primary button:
+“Explore Our School”
+
+Secondary button:
+“Enquire About Admissions”
+
+Design requirements:
+
+- Use a high-quality photograph relevant to a Pakistani school environment.
+- Ensure excellent text contrast.
+- Use a restrained image overlay only when necessary for readability.
+- Avoid excessive animations.
+- Make the section look excellent on mobile.
+- Do not let the hero occupy the entire screen unnecessarily.
+- Do not invent rankings, admission deadlines, achievements, or promotional claims.
+
+Buttons must lead to meaningful sections or working destinations.
+
+## SECTION 3 — ABOUT THE MONT UNI
+
+Create a concise introduction explaining the school's educational identity.
+
+Suggested copy:
+
+“At The Mont Uni Pre Cadet Academy, education is about more than academic learning. We aim to support students in developing knowledge, confidence, discipline, responsibility and positive character in a supportive learning environment.”
+
+Treat this as proposed website copy and obtain school approval before publishing it as an official institutional statement.
+
+Include a suitable photograph if available.
+
+Do not invent the principal's name, founding history, teaching philosophy beyond approved information, campus facilities, or examination affiliations.
+
+Keep this section short and visually appealing.
+
+## SECTION 4 — ACADEMICS: CLASSES 1–10
+
+Use “Classes 1–10” as the default public-facing terminology because it is familiar to Pakistani parents. Confirm the school's official terminology before publication.
+
+Create two prominent academic groups:
+
+### Classes 1–5
+Use a clean academic card describing primary-level learning and foundational development.
+
+### Classes 6–10
+Use a matching card describing continued academic learning and progression.
+
+Design requirements:
+
+- Two clear, visually balanced cards.
+- Appropriate school photography or subtle educational illustrations.
+- Brief descriptions.
+- Clear typography.
+- Responsive layout.
+- Links to detailed academic pages if available.
+
+Do not invent subjects, curricula, Matric board affiliation, Cambridge qualifications, examination programmes, laboratories, facilities, or teaching methods.
+
+Any programme-specific claims must be based on verified school information.
+
+## SECTION 5 — AI & DIGITAL LEARNING
+
+Create a compact, elegant section titled:
+
+“Preparing Students for a Digital Future”
+
+This section should complement the school's academic identity rather than dominate the website.
+
+Potential topics include:
+
+- Digital literacy.
+- Responsible use of artificial intelligence.
+- Online safety and digital responsibility.
+- Creative problem-solving.
+- Basic coding or age-appropriate computing skills.
+
+Only describe these as current offerings if the school confirms they are genuinely delivered.
+
+If they are planned but not yet implemented, label them clearly as future initiatives or omit them from the public-facing content until approved.
+
+Avoid excessive AI-themed graphics, futuristic illustrations, or technology dashboard elements.
+
+## SECTION 6 — SCHOOL LIFE AND CHARACTER BUILDING
+
+Create an attractive photography-led section showcasing the real school environment.
+
+Potential categories:
+
+- Classroom learning.
+- Student participation.
+- Teamwork and responsibility.
+- School events.
+- Pre-Cadet activities.
+- Leadership and character development.
+- Spoken English and communication, if genuinely offered.
+
+Use a balanced photo grid or editorial gallery.
+
+Do not invent sports facilities, parade grounds, military affiliations, laboratories, events, or extracurricular programmes.
+
+Only include photographs and activities that the school is authorised to publish.
+
+### Spoken English
+
+If verified, add a small supporting highlight:
+
+“Speak with Confidence”
+
+Possible supporting topics include everyday conversation, listening, clear pronunciation and public speaking.
+
+Keep it secondary to the main academic identity.
+
+## SECTION 7 — ADMISSIONS AND CONTACT
+
+Create a professional admissions section with a working enquiry form.
+
+Fields:
+
+- Parent/Guardian Name.
+- Contact Number.
+- Desired Class.
+- Message.
+
+Use a class selector with the school's verified available classes.
+
+Include appropriate validation and clear error messages.
+
+On successful submission, show a confirmation message only after the backend confirms that the enquiry was actually accepted.
+
+Requirements:
+
+- Real form submission.
+- Server-side validation.
+- Spam protection appropriate to the deployment.
+- Safe storage and restricted access to submitted enquiries.
+- No public exposure of parent contact information.
+- No fake success messages.
+- No nonfunctional submit buttons.
+
+Include the following contact elements only when verified:
+
+- Official school phone number.
+- Official WhatsApp number.
+- Campus address.
+- Email address.
+- Social media profiles.
+- Map location.
+
+WhatsApp buttons must use a verified school number and a valid link. Do not invent phone numbers or addresses.
+
+## SECTION 8 — FOOTER
+
+Create a clean footer containing:
+
+- Official school logo.
+- Official school name.
+- Short school introduction.
+- Important website links.
+- Verified contact information.
+- Verified social media links.
+- School Portal login link.
+- Copyright information.
+
+Avoid repeating entire homepage sections in the footer.
+
+The School Portal link must lead to a real portal or a clearly marked development page until the portal is implemented.
+
+---
+
+# 5. SCHOOL MANAGEMENT SYSTEM
+
+Build the management system as a separate, securely authenticated application area.
+
+It should share the school's visual identity but use a practical, data-oriented interface.
+
+Do not create a decorative dashboard that merely resembles functioning software.
+
+## Initial user roles
+
+### Administrator
+- Manage authorised user accounts.
+- Create and update student records.
+- Organise classes and class lists.
+- Manage attendance records.
+- View and generate authorised academic reports.
+- Review teacher activity reports.
+- Publish announcements.
+- Manage appropriate access permissions.
+
+### Teacher
+- View only the classes and students they are authorised to access.
+- Record student attendance.
+- Enter permitted academic results.
+- Submit teacher activity reports.
+- View relevant class information.
+- Read school announcements.
+
+### Parent — optional future phase
+- Secure access to their own child's records only.
+- View authorised attendance and results.
+- Read school announcements.
+
+Do not implement parent access as unrestricted access to the student database.
+
+## Core modules
+
+### A. Authentication and authorisation
+Implement real authentication through an established authentication provider or a properly secured backend.
+
+Requirements:
+
+- Secure sign-in and sign-out.
+- Secure session management.
+- Role-based access control.
+- Server-side permission checks.
+- Password reset or recovery through a supported secure process.
+- Rate limiting or equivalent protections where appropriate.
+- No hard-coded administrator credentials.
+- No public registration for privileged roles unless explicitly authorised.
+
+Hiding a button in the frontend is not a security boundary. All sensitive operations must enforce permissions on the server.
+
+### B. Student records
+Store the minimum information needed for school operations.
+
+Possible fields:
+
+- Student identifier.
+- Student name.
+- Class and section.
+- Admission information.
+- Parent or guardian contact details where necessary.
+- Active or inactive status.
+
+Collect additional personal information only where required and authorised.
+
+### C. Attendance
+Support:
+
+- Daily attendance.
+- Class-based attendance entry.
+- Present, absent and other school-approved attendance statuses.
+- Editing permissions.
+- Attendance history.
+- Date-based reports.
+- Duplicate-entry prevention.
+- Audit history for important changes.
+
+### D. Academic results
+Support:
+
+- Class and student selection.
+- Subject configuration based on verified school requirements.
+- Assessment records.
+- Marks and grades according to approved rules.
+- Student performance summaries.
+- Printable or exportable reports where authorised.
+
+Do not hard-code unverified grading systems.
+
+### E. Teacher activity reports
+Support:
+
+- Teacher identity.
+- Report date or reporting period.
+- Class or activity reference where appropriate.
+- Activities completed.
+- Notes or follow-up items.
+- Submission status.
+- Administrator review where required.
+
+Keep performance assessment fair, transparent and based on clearly defined criteria. Do not invent automated teacher rankings.
+
+### F. Announcements
+Allow authorised administrators to create, edit and publish school announcements.
+
+Implement actual persistence and appropriate access controls.
+
+## Database and backend
+
+Inspect the existing architecture before selecting or replacing the backend.
+
+If a suitable backend already exists, reuse it where safe.
+
+If no suitable backend exists, propose a practical solution using a managed backend and relational database, such as PostgreSQL with an appropriate authentication and access-control layer.
+
+Possible options include Supabase or a properly implemented custom backend.
+
+Before implementation:
+
+- Identify the existing database and authentication system, if any.
+- Document the schema.
+- Define role permissions.
+- Plan data migrations.
+- Use environment variables and server-side secret storage.
+- Configure production access policies.
+- Add appropriate backups and recovery procedures.
+- Document setup and deployment.
+
+If Supabase is used, configure row-level security and policies for every sensitive table. Do not rely solely on frontend filtering.
+
+If a feature cannot be completed because credentials, external services, or configuration are missing, implement the safe parts and document the exact remaining requirements.
+
+Do not claim the portal is production-ready until security and functionality have been tested.
+
+---
+
+# 6. TECHNICAL IMPLEMENTATION REQUIREMENTS
+
+## Existing codebase
+
+First inspect:
+
+- Framework and version.
+- Package configuration.
+- Existing routes.
+- Component structure.
+- CSS and design system.
+- Existing images and logos.
+- API integrations.
+- Authentication.
+- Database connections.
+- Environment variables.
+- Deployment configuration.
+- Existing tests.
+
+Reuse working components where practical.
+
+Do not automatically replace the existing project with an unrelated starter template.
+
+## Frontend quality
+
+- Use reusable components.
+- Use semantic HTML.
+- Keep styles consistent.
+- Ensure responsive layouts.
+- Maintain clear component boundaries.
+- Use appropriate image loading strategies.
+- Prevent horizontal overflow.
+- Avoid unnecessary dependencies.
+- Remove unused code only after verifying that it is safe to remove.
+- Ensure there are no obvious console errors.
+
+## Responsive design
+
+Test the website at approximately these viewport widths:
+
+- 320px.
+- 375px.
+- 430px.
+- 768px.
+- 1024px.
+- 1440px.
+
+These are test targets, not a replacement for broader responsive behaviour.
+
+Check:
+
+- Navigation.
+- Hero text and buttons.
+- Academic cards.
+- Image cropping.
+- Forms.
+- Tables.
+- Dashboard sidebars.
+- Dialogs and dropdowns.
+- Footer layout.
+
+No important content should be clipped or require unintended horizontal scrolling.
+
+## Accessibility
+
+Follow WCAG 2.2 AA principles where practical.
+
+Include:
+
+- Sufficient colour contrast.
+- Keyboard-accessible navigation.
+- Visible focus indicators.
+- Correct heading hierarchy.
+- Accessible form labels.
+- Useful error messages.
+- Meaningful image alternative text.
+- Reduced-motion support.
+- Accessible interactive controls.
+
+## Performance and SEO
+
+- Optimise images.
+- Avoid unnecessary JavaScript.
+- Use appropriate page titles and descriptions.
+- Add social sharing metadata where appropriate.
+- Create a sensible URL structure.
+- Configure a sitemap and robots rules when appropriate.
+- Avoid indexing private portal pages.
+- Provide a custom not-found page.
+- Ensure public pages can be indexed appropriately.
+- Do not expose private student information through metadata, source maps, or public APIs.
+
+---
+
+# 7. FUNCTIONALITY VERIFICATION
+
+Create a test checklist and report the actual results.
+
+Test:
+
+1. Logo and navigation links.
+2. Desktop and mobile menus.
+3. Admissions enquiry form.
+4. Validation and error handling.
+5. WhatsApp link, if configured.
+6. Contact links.
+7. Image loading across different devices.
+8. School Portal login.
+9. Administrator permissions.
+10. Teacher permissions.
+11. Student record creation and editing.
+12. Attendance persistence.
+13. Academic result persistence.
+14. Teacher report submission.
+15. Database access restrictions.
+16. Unauthorised record access.
+17. Session expiration and sign-out.
+18. Responsive layout.
+19. Browser console errors.
+20. Deployment configuration.
+
+Do not mark a test as passed unless it has actually been performed.
+
+Use test accounts and synthetic data during development. Do not put real student or parent data into demonstrations or screenshots without appropriate authorisation and protection.
+
+---
+
+# 8. HANDOVER REQUIREMENTS
+
+Provide:
+
+- Complete source code.
+- Project structure and technology-stack summary.
+- Dependency and licence inventory.
+- List of third-party templates and UI kits actually used.
+- List of original and stock image assets and their licence information.
+- Environment variable template without real secret values.
+- Database schema and migration instructions.
+- Authentication and role-permission documentation.
+- Deployment instructions.
+- Backup and recovery guidance.
+- Test results.
+- List of known bugs.
+- List of incomplete features.
+- External services and credentials the school must configure.
+- Instructions for updating school content and photographs.
+
+Do not claim the website belongs to the school operationally until the school has the required repository, hosting, domain, database, and service-account access.
+
+---
+
+# 9. REQUIRED DEVELOPMENT WORKFLOW
+
+Follow this order.
+
+### Phase 1 — Audit
+Inspect the existing project and report its architecture, working functionality, risks, and reusable components.
+
+### Phase 2 — Initial redesign
+Implement the first-stage visual direction with the approved palette, logo, authentic or appropriately licensed Pakistani school imagery, homepage, academic cards, AI section, and management dashboard preview.
+
+### Phase 3 — Review
+Present the desktop and mobile versions and document which elements are placeholders.
+
+### Phase 4 — Approval
+Wait for the school owner's design approval before completing the remaining implementation.
+
+### Phase 5 — Full development
+Complete the approved public website and the agreed school management modules.
+
+### Phase 6 — Testing and handover
+Test the real functionality, permissions, data storage, responsive behaviour and deployment. Provide the complete handover documentation.
+
+If you cannot literally wait for a separate approval event in the current tool workflow, stop after Phase 2 and report what is ready for review rather than silently treating the remaining phases as approved.
+
+---
+
+# 10. FINAL QUALITY STANDARD
+
+The final result must feel like a genuine, premium Pakistani school website designed for parents, not a generic AI-generated landing page.
+
+Priorities, in order:
+
+1. Professional visual design and authentic school identity.
+2. Clear presentation of Classes 1–10.
+3. School education, discipline, character and Pre-Cadet identity.
+4. Appropriate Pakistani school photography.
+5. A concise AI & Digital Learning section.
+6. Working admissions enquiries and contact information.
+7. A secure, practical School Management System.
+8. Mobile responsiveness, performance and accessibility.
+9. Complete source-code and deployment handover.
+
+Start by inspecting the existing project and implementing the first-stage redesign. Explain important architectural decisions, preserve working features, and report honestly what is functional, what is simulated, and what remains incomplete.
+
+Do not invent school facts. Do not claim tests have passed when they have not. Do not expose secrets. Do not proceed beyond the agreed approval stage without approval.
+
+**The goal is to make The Mont Uni Pre Cadet Academy look trustworthy, academically strong, locally relevant, modern, welcoming, and easy to use.**

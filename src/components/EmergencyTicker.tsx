@@ -72,23 +72,23 @@ export const EmergencyTicker: React.FC<EmergencyTickerProps> = ({
       <div
         role="region"
         aria-label="Campus Announcements and School Notices"
-        className="relative z-40 bg-amber-50/95 border-b border-amber-200/90 text-amber-950 text-xs tracking-wide overflow-hidden transition-all duration-300"
+        className="relative z-40 bg-[#EAF2EB] border-b border-[#0F5132]/20 text-[#0F5132] text-xs tracking-wide overflow-hidden transition-all duration-300 w-full max-w-full"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-3 sm:px-6 py-2">
+        <div className="max-w-7xl mx-auto w-full min-w-0 flex items-center justify-between px-3 sm:px-6 py-2">
           {/* Static Alert Label */}
-          <div className="flex items-center gap-2 pr-3 sm:pr-4 shrink-0 bg-amber-50/95 z-10 border-r border-amber-200/70">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-amber-200/60 text-amber-900 border border-amber-300">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+          <div className="flex items-center gap-2 pr-3 sm:pr-4 shrink-0 bg-[#EAF2EB] z-10 border-r border-[#0F5132]/20">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#0F5132] text-white">
+              <AlertCircle className="w-3.5 h-3.5 text-white shrink-0" />
               Notice
             </span>
-            <span className="hidden md:inline text-amber-900/80 text-[11px] font-semibold tracking-wider">
+            <span className="hidden md:inline text-[#0F5132] text-[11px] font-bold tracking-wider">
               School Bulletin
             </span>
           </div>
 
           {/* Marquee Track */}
           <div
-            className="flex-1 overflow-hidden relative mx-2 sm:mx-4"
+            className="flex-1 min-w-0 overflow-hidden relative mx-2 sm:mx-4"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -115,10 +115,10 @@ export const EmergencyTicker: React.FC<EmergencyTickerProps> = ({
                     if (onNoticeClick) onNoticeClick(notice);
                   }}
                 >
-                  <span className="text-blue-900 font-bold text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100/70 border border-blue-200">
+                  <span className="text-[#0F5132] font-bold text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-white border border-[#0F5132]/30">
                     {notice.badge}
                   </span>
-                  <span className="text-slate-800 group-hover:text-blue-900 transition-colors font-medium">
+                  <span className="text-slate-800 group-hover:text-[#0F5132] transition-colors font-medium">
                     {notice.text}
                   </span>
                   {notice.actionLabel && (
@@ -131,13 +131,13 @@ export const EmergencyTicker: React.FC<EmergencyTickerProps> = ({
                           target?.scrollIntoView({ behavior: 'smooth' });
                         }
                       }}
-                      className="inline-flex items-center gap-0.5 text-blue-800 hover:text-blue-950 underline underline-offset-2 ml-1 text-[11px] font-bold"
+                      className="inline-flex items-center gap-0.5 text-[#0F5132] hover:text-[#0c4128] underline underline-offset-2 ml-1 text-[11px] font-bold"
                     >
                       {notice.actionLabel}
                       <ChevronRight className="w-3 h-3" />
                     </a>
                   )}
-                  <span className="text-amber-400 ml-4">✦</span>
+                  <span className="text-[#D4AF37] ml-4 font-bold">✦</span>
                 </div>
               ))}
             </motion.div>
